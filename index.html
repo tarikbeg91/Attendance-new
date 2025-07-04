@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -355,7 +356,7 @@
           }
           #monthNav .month-display-group { display: flex; align-items: center; gap: 5px; }
           #monthNav button { padding: 4px 8px; font-size: 14px; margin: 0; }
-          #currentMonthDisplay { font-size: 1.1em; font-weight: bold; min-width: 100px; text-align: center; }
+          #currentMonthDisplay { font-size: 1.1em; font-weight: bold; min-width: 150px; text-align: center; }
 
           #viewReportButtonsWrapper {
             display: flex; justify-content: space-between; align-items: center;
@@ -491,7 +492,7 @@
          }
          #addPaymentForm label { font-size: 0.9em; }
          #addPaymentForm input[type="number"],
-         #addPaymentForm input[type="date"], /* Added for potential future use */
+         #addPaymentForm input[type="date"],
          #addPaymentForm input[type="text"] {
              flex-grow: 1; min-width: 100px; margin: 0;
         }
@@ -601,6 +602,9 @@
              <button id="darkModeToggleBtn" onclick="toggleDarkMode()" class="control-icon" data-translate-key-title="Toggle Dark Mode / डार्क मोड टॉगल करें">
                  <i class="fas fa-moon"></i>
              </button>
+             <button id="modeToggleBtn" onclick="toggleCalculationMode()" class="control-icon" data-translate-key-title="toggleCalculationModeTitle">
+                <span id="modeIcon">📅</span>
+             </button>
              <button id="hideUsersBtn" onclick="toggleUsers()">
                  <span data-translate-key="hideShowNames">Hide/Show Names</span>
              </button>
@@ -666,22 +670,22 @@
         <div id="userQuickControls">
              <div id="rateContainer">
                  <label for="userRate" data-translate-key="rateLabel">Rate (Per Attendance):</label>
-                 <input type="number" id="userRate" min="0" data-translate-key-placeholder="ratePlaceholderShort" placeholder="Rate">
+                 <input type="number" id="userRate" step="any" min="0" data-translate-key-placeholder="ratePlaceholderShort" placeholder="Rate">
              </div>
 
              <div id="overtimeRateContainer">
                  <label for="userOvertimeRate" data-translate-key="overtimeRateLabel">Overtime Hours per Attendance Rate:</label>
-                 <input type="number" id="userOvertimeRate" min="1" step="0.5" data-translate-key-placeholder="otRatePlaceholderShort" placeholder="OT Rate">
+                 <input type="number" id="userOvertimeRate" step="any" min="1" data-translate-key-placeholder="otRatePlaceholderShort" placeholder="OT Rate">
              </div>
 
               <div id="manualBalanceContainer">
                  <label for="manualCarriedOverBalance" data-translate-key="manualBalanceLabel">Carried Over Balance:</label>
-                 <input type="number" id="manualCarriedOverBalance" data-translate-key-placeholder="balancePlaceholderShort" placeholder="Previous Balance">
+                 <input type="number" id="manualCarriedOverBalance" step="any" data-translate-key-placeholder="balancePlaceholderShort" placeholder="Previous Balance">
               </div>
 
               <div id="includeBalanceContainer">
                   <label for="otherUserForReport" data-translate-key="includeBalanceOf">Include Balance of:</label>
-                  <select id="otherUserForReport" onchange="showSummary(activeReportType)">
+                  <select id="otherUserForReport" onchange="showSummary()">
                       <option value="" selected disabled hidden data-translate-key="selectUserPlaceholderShort">-- User --</option>
                       </select>
               </div>
@@ -690,26 +694,22 @@
 
         <div id="monthNavWrapper">
             <div id="monthNav">
-                <button onclick="goToPreviousMonth()">❮ <span data-translate-key="previous">Previous</span></button>
+                <button onclick="goToPreviousPeriod()">❮ <span data-translate-key="previous">Previous</span></button>
                 <div class="month-display-group">
                     <span id="currentMonthDisplay"></span>
-                    <button id="quickMonthChangeBtn" onclick="promptQuickMonthChange()" title="Quick Change Month">⚡</button>
+                    <button id="quickMonthChangeBtn" onclick="promptQuickPeriodChange()" title="Quick Change Period">⚡</button>
                 </div>
-                <button onclick="goToNextMonth()"><span data-translate-key="next">Next</span> ❯</button>
+                <button onclick="goToNextPeriod()"><span data-translate-key="next">Next</span> ❯</button>
             </div>
         </div>
 
-        <div id="viewReportButtonsWrapper">
-            <button onclick="showSummary('firstHalfIndependent')"><span data-translate-key="first15DaysIndie">1-15 (Indie)</span></button>
-            <button onclick="showSummary('afterFifteenthIndependent')"><span data-translate-key="after15thIndie">16-End (Indie)</span></button>
-            <button onclick="showSummary('firstHalfCurrent')"><span data-translate-key="first15DaysInfo">1-15 (Info)</span></button>
-            <button onclick="showSummary('afterFifteenthCurrent')"><span data-translate-key="after15thInfo">16-End (Info)</span></button>
-            <button onclick="showSummary('fullMonth')"><span data-translate-key="fullMonth">Full Month</span></button>
-            <button id="viewOverallReportBtn" data-translate-key="viewOverallReport" onclick="displayOverallReport()">View Overall Report</button>
+        <div id="viewReportButtonsWrapper" style="margin-top: 15px; margin-bottom: 10px;">
+            <button id="viewOverallReportBtn" data-translate-key="viewOverallReport" onclick="displayOverallReport()" style="width:100%;">View Overall Report</button>
         </div>
 
+
          <div id="shareReportButtonWrapper">
-            <button onclick="shareReport()">
+            <button onclick="shareReport()" style="width:100%;">
                 <span data-translate-key="shareReportImage">Share Report (Image)</span>
              </button>
          </div>
@@ -721,8 +721,8 @@
              <div id="paymentList"></div>
              <div id="addPaymentForm">
                   <label for="paymentAmount" data-translate-key="amountLabel">Amount:</label>
-                  <input type="number" id="paymentAmount" data-translate-key-placeholder="amountPlaceholder" placeholder="Amount">
-                  <label for="paymentDate" data-translate-key="dateLabel">Date:</label> <!-- Added Date input for payment -->
+                  <input type="number" id="paymentAmount" step="any" data-translate-key-placeholder="amountPlaceholder" placeholder="Amount">
+                  <label for="paymentDate" data-translate-key="dateLabel">Date:</label>
                   <input type="date" id="paymentDate">
                   <label for="paymentNotes" data-translate-key="notesLabel">Notes:</label>
                   <input type="text" id="paymentNotes" data-translate-key-placeholder="notesPlaceholder" placeholder="Notes">
@@ -743,24 +743,22 @@
              'en': {
                 appTitle: "Attendance Tracker", hideShowNames: "Hide/Show Names", dataManagement: "Data Management",
                  dataManagementOptions: "Data Management Options", exportData: "Export Data (JSON)", importData: "Data Import (JSON)",
-                 clearAllData: "Clear All Data", chartsTitle: "Charts", forUser: "For", previous: "Previous", next: "Next",
-                 // Updated for new report types
-                 first15DaysIndie: "1-15 (Calc)", after15thIndie: "16-End (Calc)",
-                 first15DaysInfo: "1-15 (Info)", after15thInfo: "16-End (Info)",
-                 fullMonth: "Full Month",
+                 clearAllData: "Clear All Data", forUser: "For", previous: "Previous", next: "Next",
+                 toggleCalculationModeTitle: "Toggle between Full Month and Half Month mode",
+                 fullMonthMode: "Full Month Mode", halfMonthMode: "Half Month Mode",
                  shareReportImage: "Share Report (Image)", prevBalancePaymentsTitle: "Payments Received Towards Previous Balance",
                  amountLabel: "Amount:", dateLabel: "Date:", notesLabel: "Notes:", addPayment: "Add Payment",
                  cancel: "Cancel", mergeData: "Merge Data", replaceAllData: "Replace All Data", attendanceHeader: "Attendance",
                  expensesHeader: "Expenses", rent: "Rent", food: "Food", received: "Received (Daily)", balance: "Balance",
                  addNewNamePlaceholder: "Add New Name", notesPlaceholder: "Notes", amountPlaceholder: "Amount",
-                 promptMonthInput: "Enter Month (YYYY-MM):",
+                 promptMonthInput: "Enter Period (YYYY-MM for Full, YYYY-MM_1 for 1-15, YYYY-MM_2 for 16-End):",
                  dateHeaderTbl: "Date", statusHeaderTbl: "Status", otHeaderTbl: "OT", rentHeaderTbl: "Rent", foodHeaderTbl: "Food", receivedHeaderTbl: "Received", notesHeaderTbl: "Notes", editedHeaderTbl: "Edited",
                  alertEnterName: "Please enter a name.", alertUserExists: "User '{name}' already exists (case-insensitive match)! Do you want to reactivate them?",
-                 alertUserAdded: "User '{name}' added successfully!", alertSelectUserMonth: "Please select a user and month first.",
+                 alertUserAdded: "User '{name}' added successfully!", alertSelectUserMonth: "Please select a user and period first.",
                  alertEnterValidAmount: "Please enter a valid positive amount.", alertPaymentAdded: "Payment added.", alertPaymentDeleted: "Payment deleted.",
                  confirmDeletePayment: "Are you sure you want to delete this payment of {amount}?",
-                 alertGenerateReportFirst: "Please generate a report first by clicking one of the 'View Report' buttons.",
-                 alertCannotGenerateImage: "Cannot generate report image without a selected user, month, or table data.",
+                 alertGenerateReportFirst: "Please generate a report first.",
+                 alertCannotGenerateImage: "Cannot generate report image without a selected user, period, or table data.",
                  alertWebShareFailed: "Sharing failed directly. Report image downloaded instead.", alertWebShareCancelled: "Web Share cancelled by user.",
                  alertImageDownloaded: "Report image generated. It should be downloaded to your device.", alertCouldNotGenerateImage: "Could not generate report image.",
                  confirmClearData: "Are you sure you want to delete ALL user data? This action cannot be undone.",
@@ -780,26 +778,21 @@
                  attendanceSummary: "Attendance: {days} days × {rate} = {total}",
                  overtimeSummary: "Overtime: {hours} hours → {amount} ({hoursPerDay} hours equals 1 Attendance Rate)",
                  rentSummary: "Rent: {amount}", foodSummary: "Food: {amount}", currentPeriodGross: "Current Period Gross Total: {amount}",
-                 carriedOverBalance: "Carried Over Balance: {amount}", // Simplified, context added in JS
+                 carriedOverBalance: "Carried Over Balance: {amount}",
                  manualBalanceLabel: "Carried Over Balance:", manualBalancePlaceholder: "Enter Previous Balance",
                  totalOwed: "Total Amount Owed (Gross + Carried Over Balance): {amount}",
                  totalReceivedDaily: "Total Received (Daily Entries this Period): {amount}",
                  totalReceivedPrevBalance: "Total Received (Towards Previous Balance this Period): {amount}",
                  totalAllReceived: "Total ALL Received (This Period): {amount}",
-                 finalBalanceDue: "Final Balance Due: {amount}", // Context (Period/Full Month) added in JS
-                 finalBalanceDueForPeriod: "Final Balance Due (This Period): {amount}",
-                 finalBalanceDueFullMonthContext: "Final Balance Due (Full Month Context): {amount}",
-                 reportTitleFull: "{year} {month} ({days} days) Report",
-                 reportTitleFirstHalf: "{year} {month} First {days} Days Report",
-                 reportTitleAfterFifteenth: "{year} {month} Report After 15th ({days} days)",
-                 reportGeneratedOn: "Report for {user} ({monthYear}{periodType}) - Generated on {dateTime}\nFinal Balance Due: {balance}{otherUserBalanceString}",
-                 reportPeriodFullMonth: " (Full Month)",
-                 reportPeriodFirstHalfIndie: " (1-15, Calc)", reportPeriodAfter15thIndie: " (16-End, Calc)",
-                 reportPeriodFirstHalfInfo: " (1-15, Info)", reportPeriodAfter15thInfo: " (16-End, Info)",
+                 finalBalanceDueForPeriod: "Final Balance Due (for this Period): {amount}",
+                 reportTitleFull: "{year} {month}",
+                 reportTitleFirstHalf: "{year} {month} (1-15)",
+                 reportTitleSecondHalf: "{year} {month} (16-End)",
+                 reportGeneratedOn: "Report for {user} ({periodTitle}) - Generated on {dateTime}\nFinal Balance Due: {balance}{otherUserBalanceString}",
                  reminderFinalize: "Month is ending soon. Remember to finalize reports.",
                  noPaymentsRecorded: "no payments recorded for this period.", noDataForMonth: "No or invalid data structure available for {monthKey}.",
                  pleaseSelectUser: "Please select a user first.", errorInvalidMonthKey: "Error: Invalid month data key \"{monthKey}\".",
-                 invalidMonth: "Invalid Month", alertInvalidMonthFormat: "Invalid month format. Please use YYYY-MM (e.g., 2023-10).",
+                 invalidMonth: "Invalid Month", alertInvalidPeriodFormat: "Invalid period format. Use YYYY-MM, YYYY-MM_1, or YYYY-MM_2.",
                  alertInvalidDateTimeFormat: "Invalid date/time format. Please use DD-MM-YYYY and HH:MM or leave empty.",
                  alertMonthDoesNotExist: "No data available for month {monthKey}.", noDate: "No Date/Time", autoSaveStatus: "Auto-saved: {time}",
                  confirmArchiveUser: "Are you sure you want to archive user '{name}'? Their data will be saved but they won't appear in the main list until you click 'Show Archived Users'.",
@@ -807,8 +800,8 @@
                  confirmReactivateUser: "User '{name}' is currently archived. Do you want to reactivate them?",
                  alertUserReactivated: "User '{name}' has been reactivated.", showOptions: "Show Options", hideOptions: "Hide Options",
                  showArchived: "Show Archived", hideArchived: "Hide Archived", archiveUser: "Archive User", reactivateUser: "Reactivate User",
-                 cannotGoToFutureMonth: "Cannot navigate to a future month relative to the current system date.",
-                 confirmCarryOverBalance: "Do you want to carry over the balance of {amount} to month {month}?",
+                 cannotGoToFutureMonth: "Cannot navigate to a future period relative to the current system date.",
+                 confirmCarryOverBalance: "Do you want to carry over the balance of {amount} to the period {period}?",
                  viewOverallReport: "View Overall Report", overallReportTitle: "Overall Report for {user}",
                  overallAttendanceSummary: "Total Attendance Days: {days}", overallOvertimeSummary: "Total Overtime Hours: {hours}",
                  overallRentSummary: "Total Rent: {amount}", overallFoodSummary: "Total Food: {amount}",
@@ -818,7 +811,7 @@
                  includeBalanceOf: "Include Balance of:", otherUserPeriodEarnings: "Period Earnings for {otherUser}: {amount}",
                  otherUserPeriodReceived: "Period Received (Daily) for {otherUser}: {amount}", otherUserPeriodNet: "Period Net for {otherUser} ({earnings} - {received}): {amount}",
                  otherUserFinalBalance: "Final Balance Due for {otherUser}: {amount}", combinedFinalBalance: "Combined Final Balance Due ({currentUser} + {otherUser}'s Final Balance): {amount}",
-                 footerIncludeOtherUserFinalBalance: "\n(Including {otherUser}'s Final Balance: {otherUserFinalBalance}) \nCombined Balance: {combinedBalance}",
+                 footerIncludeOtherUserFinalBalance: "\n({otherUser}'s Final Balance included: {otherUserFinalBalance}) \nCombined Balance: {combinedBalance}",
                  overtimeRateLabel: "Overtime Hours per Attendance Rate:", otRatePlaceholder: "OT Rate", selectUserPlaceholder: "-- Select User --",
                  ratePlaceholderShort: "Rate", otRatePlaceholderShort: "OT", balancePlaceholderShort: "Bal", selectUserPlaceholderShort: "-- User --",
                  editedDatePlaceholder: "DD-MM-YYYY", editedTimePlaceholder: "HH:MM",
@@ -826,29 +819,26 @@
                  alertPaymentDateRequired: "Please select a date for the payment.",
                  carriedOverBalanceFromPrevMonth: "Carried Over Balance (from Previous Month): {amount}",
                  carriedOverBalanceFromPrevPeriod: "Carried Over Balance (from 1-15 Period): {amount}",
-
             },
              'hi': {
                 appTitle: "हाज़िरी ट्रैकर", hideShowNames: "नाम छिपाएँ/दिखाएँ", dataManagement: "डेटा प्रबंधन",
                  dataManagementOptions: "डेटा प्रबंधन विकल्प", exportData: "डेटा एक्सपोर्ट करें (JSON)", importData: "डेटा इम्पोर्ट करें (JSON)",
-                 clearAllData: "सारा डेटा साफ़ करें", chartsTitle: "चार्ट", forUser: "के लिए", previous: "पिछला", next: "अगला",
-                 // Updated for new report types - Hindi
-                 first15DaysIndie: "1-15 (गणना)", after15thIndie: "16-अंत (गणना)",
-                 first15DaysInfo: "1-15 (जानकारी)", after15thInfo: "16-अंत (जानकारी)",
-                 fullMonth: "पूरा महीना",
+                 clearAllData: "सारा डेटा साफ़ करें", forUser: "के लिए", previous: "पिछला", next: "अगला",
+                 toggleCalculationModeTitle: "फुल मंथ और हाफ मंथ मोड के बीच स्विच करें",
+                 fullMonthMode: "फुल मंथ मोड", halfMonthMode: "हाफ मंथ मोड",
                  shareReportImage: "रिपोर्ट शेयर करें (इमेज)", prevBalancePaymentsTitle: "पिछले बैलेंस के लिए प्राप्त भुगतान",
                  amountLabel: "राशि:", dateLabel: "तारीख:", notesLabel: "टिप्पणियाँ:", addPayment: "भुगतान जोड़ें",
                  cancel: "रद्द करें", mergeData: "डेटा मर्ज करें", replaceAllData: "सारा डेटा बदलें", attendanceHeader: "हाज़िरी",
                  expensesHeader: "खर्च", rent: "किराया", food: "खाना", received: "प्राप्त (रोजाना)", balance: "बैलेंस",
                  addNewNamePlaceholder: "नया नाम जोड़ें", notesPlaceholder: "टिप्पणियाँ", amountPlaceholder: "राशि",
-                 promptMonthInput: "महीना दर्ज करें (YYYY-MM):",
+                 promptMonthInput: "अवधि दर्ज करें (YYYY-MM फुल के लिए, YYYY-MM_1 1-15 के लिए, YYYY-MM_2 16-अंत के लिए):",
                  dateHeaderTbl: "तारीख", statusHeaderTbl: "स्थिति", otHeaderTbl: "ओटी", rentHeaderTbl: "किराया", foodHeaderTbl: "खाना", receivedHeaderTbl: "प्राप्त", notesHeaderTbl: "टिप्पणियाँ", editedHeaderTbl: "संपादित",
                  alertEnterName: " कृपया एक नाम दर्ज करें।", alertUserExists: "यूज़र '{name}' पहले से मौजूद है! क्या आप उन्हें फिर से सक्रिय करना चाहते हैं?",
-                 alertUserAdded: "यूज़र '{name}' सफलतापूर्वक जोड़ा गया!", alertSelectUserMonth: "कृपया पहले एक यूज़र और महीना चुनें।",
+                 alertUserAdded: "यूज़र '{name}' सफलतापूर्वक जोड़ा गया!", alertSelectUserMonth: "कृपया पहले एक यूज़र और अवधि चुनें।",
                  alertEnterValidAmount: " कृपया एक मान्य सकारात्मक राशि दर्ज करें।", alertPaymentAdded: "भुगतान जोड़ा गया।", alertPaymentDeleted: " भुगतान हटाया गया।",
                  confirmDeletePayment: "क्या आप निश्चित हैं कि आप {amount} का यह भुगतान हटाना चाहते हैं?",
-                 alertGenerateReportFirst: "कृपया पहले 'रिपोर्ट देखें' बटनों में से किसी एक पर क्लिक करके रिपोर्ट जनरेट करें।",
-                 alertCannotGenerateImage: "चुने हुए यूज़र, महीने, या तालिका डेटा के बिना रिपोर्ट इमेज जनरेट नहीं की जा सकती।",
+                 alertGenerateReportFirst: "कृपया पहले एक रिपोर्ट जनरेट करें।",
+                 alertCannotGenerateImage: "चुने हुए यूज़र, अवधि, या तालिका डेटा के बिना रिपोर्ट इमेज जनरेट नहीं की जा सकती।",
                  alertWebShareFailed: "सीधा शेयर विफल रहा। रिपोर्ट इमेज इसके बजाय डाउनलोड की गई।", alertWebShareCancelled: "यूज़र द्वारा वेब शेयर रद्द किया गया।",
                  alertImageDownloaded: "रिपोर्ट इमेज जनरेट की गई। इसे आपके डिवाइस पर डाउनलोड होना चाहिए।", alertCouldNotGenerateImage: "रिपोर्ट इमेज जनरेट नहीं हो सकी।",
                  confirmClearData: "क्या आप निश्चित हैं कि आप **सारा** यूज़र डेटा हटाना चाहते हैं? यह कार्रवाई पूर्ववत नहीं की जा सकती।",
@@ -868,26 +858,21 @@
                  attendanceSummary: "हाज़िरी: {days} दिन × {rate} = {total}",
                  overtimeSummary: "ओवरटाइम: {hours} घंटे → {amount} ({hoursPerDay} घंटे 1 हाज़िरी दर के बराबर)",
                  rentSummary: "किराया: {amount}", foodSummary: "खाना: {amount}", currentPeriodGross: "वर्तमान अवधि का सकल योग: {amount}",
-                 carriedOverBalance: "लाया गया बैलेंस: {amount}", // सरलीकृत
+                 carriedOverBalance: "लाया गया बैलेंस: {amount}",
                  manualBalanceLabel: "लाया गया बैलेंस:", manualBalancePlaceholder: "पिछला बैलेंस दर्ज करें",
                  totalOwed: "कुल देय राशि (सकल + लाया गया बैलेंस): {amount}",
                  totalReceivedDaily: "कुल प्राप्त (इस अवधि की रोज़ाना प्रविष्टियाँ): {amount}",
                  totalReceivedPrevBalance: "कुल प्राप्त (इस अवधि में पिछले बैलेंस के लिए): {amount}",
                  totalAllReceived: "कुल सभी प्राप्त (इस अवधि): {amount}",
-                 finalBalanceDue: "अंतिम देय बैलेंस: {amount}", // संदर्भ JS में जोड़ा जाएगा
                  finalBalanceDueForPeriod: "अंतिम देय बैलेंस (इस अवधि के लिए): {amount}",
-                 finalBalanceDueFullMonthContext: "अंतिम देय बैलेंस (पूरे महीने का संदर्भ): {amount}",
-                 reportTitleFull: "{year} {month} ({days} दिन) रिपोर्ट",
-                 reportTitleFirstHalf: "{year} {month} के पहले {days} दिन की रिपोर्ट",
-                 reportTitleAfterFifteenth: "{year} {month} की 15 तारीख के बाद की रिपोर्ट ({days} दिन)",
-                 reportGeneratedOn: "{user} के लिए रिपोर्ट ({monthYear}{periodType}) - {dateTime} को जनरेट की गई\nअंतिम देय बैलेंस: {balance}{otherUserBalanceString}",
-                 reportPeriodFullMonth: " (पूरा महीना)",
-                 reportPeriodFirstHalfIndie: " (1-15, गणना)", reportPeriodAfter15thIndie: " (16-अंत, गणना)",
-                 reportPeriodFirstHalfInfo: " (1-15, जानकारी)", reportPeriodAfter15thInfo: " (16-अंत, जानकारी)",
+                 reportTitleFull: "{year} {month}",
+                 reportTitleFirstHalf: "{year} {month} (1-15)",
+                 reportTitleSecondHalf: "{year} {month} (16-अंत)",
+                 reportGeneratedOn: "{user} के लिए रिपोर्ट ({periodTitle}) - {dateTime} को जनरेट की गई\nअंतिम देय बैलेंस: {balance}{otherUserBalanceString}",
                  reminderFinalize: "महीना जल्द ही समाप्त हो रहा है। रिपोर्ट को अंतिम रूप देना याद रखें।",
                  noPaymentsRecorded: "इस अवधि के लिए कोई भुगतान दर्ज नहीं किया गया।", noDataForMonth: "{monthKey} के लिए कोई या अमान्य डेटा संरचना उपलब्ध नहीं है।",
                  pleaseSelectUser: "कृपया पहले एक यूज़र चुनें।", errorInvalidMonthKey: "त्रुटि: अमान्य महीना डेटा कुंजी \"{monthKey}\"।",
-                 invalidMonth: "अमान्य महीना", alertInvalidMonthFormat: "अमान्य महीना प्रारूप। कृपया YYYY-MM (जैसे, 2023-10) का उपयोग करें।",
+                 invalidMonth: "अमान्य महीना", alertInvalidPeriodFormat: "अमान्य अवधि प्रारूप। YYYY-MM, YYYY-MM_1, या YYYY-MM_2 का उपयोग करें।",
                  alertInvalidDateTimeFormat: "अमान्य तारीख/समय प्रारूप। कृपया DD-MM-YYYY और HH:MM का उपयोग करें या खाली छोड़ दें।",
                  alertMonthDoesNotExist: "महीना {monthKey} के लिए कोई डेटा उपलब्ध नहीं है।", noDate: "कोई तारीख/समय नहीं", autoSaveStatus: "ऑटो-सेव हुआ: {time}",
                  confirmArchiveUser: "क्या आप निश्चित हैं कि आप यूज़र '{name}' को संग्रहित (archive) करना चाहते हैं? उनका डेटा सहेजा जाएगा लेकिन जब तक आप 'संग्रहित यूज़र दिखाएँ' पर क्लिक नहीं करते, वे मुख्य सूची में दिखाई नहीं देंगे।",
@@ -895,8 +880,8 @@
                  confirmReactivateUser: "यूज़र '{name}' वर्तमान में संग्रहित है। क्या आप उन्हें फिर से सक्रिय करना चाहते हैं?",
                  alertUserReactivated: "यूज़र '{name}' को फिर से सक्रिय कर दिया गया है।", showOptions: "विकल्प दिखाएँ", hideOptions: "विकल्प छिपाएँ",
                  showArchived: "संग्रहित दिखाएँ", hideArchived: "संग्रहित छिपाएँ", archiveUser: "यूज़र संग्रहित करें", reactivateUser: "यूज़र फिर से सक्रिय करें",
-                 cannotGoToFutureMonth: "सिस्टम की वर्तमान तारीख से भविष्य के महीने में नहीं जा सकते।",
-                 confirmCarryOverBalance: "क्या आप {amount} का बैलेंस {month} महीने में ले जाना चाहते हैं?",
+                 cannotGoToFutureMonth: "सिस्टम की वर्तमान तारीख से भविष्य की अवधि में नहीं जा सकते।",
+                 confirmCarryOverBalance: "क्या आप {amount} का बैलेंस {period} अवधि में ले जाना चाहते हैं?",
                  viewOverallReport: "कुल रिपोर्ट देखें", overallReportTitle: "{user} के लिए कुल रिपोर्ट",
                  overallAttendanceSummary: "कुल उपस्थिति दिन: {days}", overallOvertimeSummary: "कुल ओवरटाइम घंटे: {hours}",
                  overallRentSummary: "कुल किराया: {amount}", overallFoodSummary: "कुल खाना: {amount}",
@@ -919,17 +904,19 @@
         let currentLanguage = localStorage.getItem('appLanguage') || 'hi';
         let data = {};
         let currentUser = null;
-        let currentlyViewedMonth = null;
-        let activeReportType = 'fullMonth'; // Default report type, will be overridden by localStorage if available
+        let calculationMode = 'fullMonth'; 
+        let currentlyViewedPeriod = null; 
+
         let finalBalanceForReport = 0;
         let combinedFinalBalanceForReport = 0;
         let otherUserFinalBalanceForReport = 0;
         let importDataBuffer = null;
         let showArchivedUsers = false;
 
-        const RENDER_DELAY = 350;
+        const RENDER_DELAY = 100;
         let renderTimeout = null;
         let saveStatusTimeout = null;
+        let summaryUpdateTimeout = null;
 
         function translate(key, params = {}) {
             let text = translations[currentLanguage]?.[key] || translations['en']?.[key] || key;
@@ -970,7 +957,7 @@
                         headers[7].textContent = translate('editedHeaderTbl');
                     }
                }
-               updateMonthDisplay();
+               updatePeriodDisplay();
 
                 const archiveUserBtn = document.getElementById('archiveUserBtn');
                 if (archiveUserBtn && currentUser && data[currentUser]) {
@@ -1027,7 +1014,7 @@
             localStorage.setItem('appLanguage', currentLanguage);
             document.documentElement.lang = currentLanguage;
             applyTranslationsToUI();
-             scheduleFullRender(100);
+             scheduleFullRender();
         }
         function setDarkMode(isDark) {
             const htmlElement = document.documentElement;
@@ -1041,7 +1028,7 @@
                  localStorage.setItem('darkMode', 'disabled');
                  if(toggleIcon) { toggleIcon.classList.remove('fa-sun'); toggleIcon.classList.add('fa-moon'); }
              }
-              scheduleFullRender(100);
+              scheduleFullRender();
         }
         function toggleDarkMode() { setDarkMode(!document.documentElement.classList.contains('dark')); }
         if (localStorage.getItem('darkMode') === 'enabled') setDarkMode(true); else setDarkMode(false);
@@ -1052,8 +1039,9 @@
               if (!currentUser || (data[currentUser] && data[currentUser].isActive === false)) {
                   reminderDiv.style.display = 'none'; return;
               }
-              if (!currentlyViewedMonth) { reminderDiv.style.display = 'none'; return; }
-              const [year, monthNum] = currentlyViewedMonth.split('-').map(Number);
+              if (!currentlyViewedPeriod) { reminderDiv.style.display = 'none'; return; }
+              const monthKey = currentlyViewedPeriod.split('_')[0];
+              const [year, monthNum] = monthKey.split('-').map(Number);
               const today = new Date();
               const currentSystemYear = today.getFullYear();
               const currentSystemMonth = today.getMonth() + 1;
@@ -1082,8 +1070,7 @@
              const quickChange = document.getElementById('quickMonthChangeBtn');
              const userQuickControls = document.getElementById('userQuickControls');
 
-
-             if (!currentUser || !currentlyViewedMonth || !data[currentUser]) {
+             if (!currentUser || !currentlyViewedPeriod || !data[currentUser]) {
                  userControl.style.display = "none";
                  tableContainer.innerHTML = "";
                  monthlySummarySection.innerHTML = "";
@@ -1110,39 +1097,45 @@
              monthlySummarySection.style.display = 'block';
              overallSummarySection.style.display = 'none';
 
-             renderTable(currentlyViewedMonth);
-             showSummary(activeReportType);
+             renderTable();
+             showSummary();
              checkReminders();
              applyTranslationsToUI();
         }
-        function scheduleFullRender(delay = RENDER_DELAY) { if (renderTimeout) clearTimeout(renderTimeout); renderTimeout = setTimeout(fullRender, delay); }
+        function scheduleFullRender(delay = RENDER_DELAY) { 
+            if (renderTimeout) clearTimeout(renderTimeout); 
+            renderTimeout = setTimeout(fullRender, delay); 
+        }
 
-        function showSaveStatus(message, type = 'success', duration = 2000) {
-            const indicator = document.getElementById('saveStatusIndicator');
-            if (!indicator) return;
-
-            indicator.textContent = message;
-            indicator.className = '';
-            indicator.style.opacity = '1';
-            indicator.style.display = 'block';
-
-            if (type === 'success') { /* Default styles apply */ }
-            else if (type === 'saving') indicator.classList.add('saving');
-            else if (type === 'error') indicator.classList.add('error');
-
-            if (saveStatusTimeout) clearTimeout(saveStatusTimeout);
-            if (duration > 0) {
-                saveStatusTimeout = setTimeout(() => {
-                    indicator.style.opacity = '0';
-                    setTimeout(() => { indicator.style.display = 'none'; }, 500);
-                }, duration);
+        function scheduleSummaryUpdate(delay = 350) {
+            if (summaryUpdateTimeout) {
+                clearTimeout(summaryUpdateTimeout);
             }
+            summaryUpdateTimeout = setTimeout(() => {
+                if (!currentUser || !currentlyViewedPeriod) return;
+                showSummary();
+                const [monthKey, periodPart] = currentlyViewedPeriod.split('_');
+                const [year, monthNum] = monthKey.split('-').map(Number);
+                const daysInMonth = getDaysInMonth(year, monthNum - 1);
+                
+                let startDayIndex = 0;
+                let endDayIndexExclusive = daysInMonth;
+
+                if (calculationMode === 'halfMonth') {
+                    if (periodPart === '1') {
+                        endDayIndexExclusive = 15;
+                    } else {
+                        startDayIndex = 15;
+                    }
+                }
+                
+                updateTableFooter(monthKey, startDayIndex, endDayIndexExclusive);
+            }, delay);
         }
 
         function loadData() {
-            // Load activeReportType from localStorage or set default
-            const storedActiveReportType = localStorage.getItem('activeReportType');
-            activeReportType = storedActiveReportType || 'fullMonth';
+            calculationMode = localStorage.getItem('calculationMode') || 'fullMonth';
+            setModeIcon();
 
             const storedData = localStorage.getItem('attendanceData');
              if (storedData) {
@@ -1167,7 +1160,7 @@
                                                 if(!Array.isArray(data[userName].months[monthKey].previousBalancePayments)) { data[userName].months[monthKey].previousBalancePayments = []; migrationNeeded = true; }
                                                 else {
                                                     data[userName].months[monthKey].previousBalancePayments.forEach(p => {
-                                                        // if (p && typeof p === 'object' && !p.date) { /* migration logic */ }
+                                                        if (p && typeof p === 'object' && !p.date) { p.date = new Date().toISOString(); migrationNeeded = true; }
                                                     });
                                                 }
                                                 if(!Array.isArray(data[userName].months[monthKey].days)) { data[userName].months[monthKey].days = []; migrationNeeded = true; }
@@ -1208,11 +1201,36 @@
              if(lastUser && data[lastUser] && (data[lastUser].isActive !== false || showArchivedUsers)) {
                 selectUser(lastUser);
              } else {
-                 currentUser = null; currentlyViewedMonth = null; localStorage.removeItem('lastSelectedUser');
+                 currentUser = null; currentlyViewedPeriod = null; localStorage.removeItem('lastSelectedUser');
                  fullRender();
              }
              checkReminders();
         }
+
+        // *** THIS IS THE NEWLY ADDED FUNCTION TO FIX THE ERROR ***
+        function showSaveStatus(message, statusType = 'success', duration = 3000) {
+            const indicator = document.getElementById('saveStatusIndicator');
+            if (!indicator) return;
+
+            if (saveStatusTimeout) {
+                clearTimeout(saveStatusTimeout);
+            }
+
+            indicator.textContent = message;
+            indicator.className = statusType; // 'saving', 'success', or 'error'
+            indicator.style.display = 'block';
+            indicator.style.opacity = '1';
+
+            if (duration > 0) {
+                saveStatusTimeout = setTimeout(() => {
+                    indicator.style.opacity = '0';
+                    setTimeout(() => {
+                        indicator.style.display = 'none';
+                    }, 500); // Wait for fade out transition
+                }, duration);
+            }
+        }
+
         function saveData() {
             showSaveStatus(translate('autoSaveStatus', {time: 'Saving...'}), 'saving', 0);
             try {
@@ -1224,6 +1242,42 @@
             } catch (e) {
                 console.error("Error saving data:", e);
                 showSaveStatus("Error saving data!", 'error', 3000);
+            }
+        }
+        
+        function toggleCalculationMode() {
+            calculationMode = (calculationMode === 'fullMonth') ? 'halfMonth' : 'fullMonth';
+            localStorage.setItem('calculationMode', calculationMode);
+            setModeIcon();
+            
+            if (currentlyViewedPeriod) {
+                const monthKey = currentlyViewedPeriod.split('_')[0];
+                if (calculationMode === 'fullMonth') {
+                    currentlyViewedPeriod = monthKey;
+                } else {
+                    const today = new Date();
+                    const currentDay = today.getDate();
+                    if (monthKey === `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, "0")}`) {
+                        currentlyViewedPeriod = `${monthKey}_${currentDay <= 15 ? '1' : '2'}`;
+                    } else {
+                        currentlyViewedPeriod = `${monthKey}_1`;
+                    }
+                }
+            }
+            scheduleFullRender();
+        }
+
+        function setModeIcon() {
+            const modeIcon = document.getElementById('modeIcon');
+            const modeToggleBtn = document.getElementById('modeToggleBtn');
+            if (modeIcon && modeToggleBtn) {
+                if (calculationMode === 'halfMonth') {
+                    modeIcon.textContent = '🌓';
+                    modeToggleBtn.title = translate('halfMonthMode');
+                } else {
+                    modeIcon.textContent = '📅';
+                    modeToggleBtn.title = translate('fullMonthMode');
+                }
             }
         }
 
@@ -1265,40 +1319,21 @@
                 user.isActive = !isArchived; saveData();
                 alert(translate(isArchived ? 'alertUserReactivated' : 'alertUserArchived', { name: currentUser }));
                 if (!user.isActive && !showArchivedUsers) {
-                    currentUser = null; currentlyViewedMonth = null; localStorage.removeItem('lastSelectedUser');
-                    fullRender(); renderUserTabs();
+                    currentUser = null; currentlyViewedPeriod = null; localStorage.removeItem('lastSelectedUser');
+                    scheduleFullRender(); renderUserTabs();
                 } else {
                     renderUserTabs();
                     selectUser(currentUser);
                 }
-                const dataManagementButtons = document.getElementById('dataManagementButtons');
-                if (dataManagementButtons.style.display === 'flex' || dataManagementButtons.style.display === 'block') {
-                    const archiveBtn = document.getElementById('archiveUserBtn');
-                    if (archiveBtn) {
-                        if (currentUser && data[currentUser]) { archiveBtn.style.display = 'inline-block'; applyTranslationsToUI(); }
-                        else { archiveBtn.style.display = 'none'; }
-                    }
-                 const toggleArchivedBtn = document.getElementById('toggleArchivedUsersBtn');
-                  if (toggleArchivedBtn) {
-                    const hasArchived = Object.values(data).some(u => u.isActive === false);
-                    toggleArchivedBtn.style.display = hasArchived || showArchivedUsers ? 'inline-block' : 'none';
-                 }
-                }
-                 checkReminders();
             }
         }
         function toggleArchivedUsers() {
              showArchivedUsers = !showArchivedUsers; renderUserTabs();
              if (currentUser && data[currentUser]?.isActive === false && !showArchivedUsers) {
-                 currentUser = null; currentlyViewedMonth = null; localStorage.removeItem('lastSelectedUser'); fullRender();
+                 currentUser = null; currentlyViewedPeriod = null; localStorage.removeItem('lastSelectedUser'); scheduleFullRender();
              } else if (!currentUser && showArchivedUsers) {
                   const lastUser = localStorage.getItem('lastSelectedUser');
                  if(lastUser && data[lastUser] && data[lastUser].isActive === false) { selectUser(lastUser); }
-             }
-             const toggleArchivedBtn = document.getElementById('toggleArchivedUsersBtn');
-             if (toggleArchivedBtn) {
-                const hasArchived = Object.values(data).some(u => u.isActive === false);
-                toggleArchivedBtn.style.display = hasArchived || showArchivedUsers ? 'inline-block' : 'none';
              }
              applyTranslationsToUI();
         }
@@ -1365,50 +1400,39 @@
 
         function selectUser(name) {
              if (!data[name]) {
-                 currentUser = null; currentlyViewedMonth = null; localStorage.removeItem('lastSelectedUser');
-                 fullRender(); renderUserTabs(); populateOtherUserDropdown(); return;
+                 currentUser = null; currentlyViewedPeriod = null; localStorage.removeItem('lastSelectedUser');
+                 scheduleFullRender(); renderUserTabs(); populateOtherUserDropdown(); return;
              }
              currentUser = name; localStorage.setItem('lastSelectedUser', name);
              document.getElementById("selectedUserName").textContent = name;
-             document.getElementById("userControl").style.display = "block";
-             document.getElementById('previousBalancePaymentsSection').style.display = 'block';
-             document.getElementById('includeBalanceContainer').style.display = 'flex';
-             renderUserTabs();
-             populateOtherUserDropdown();
-             let monthToView = currentlyViewedMonth;
-             if (!monthToView || !data[name]?.months?.[monthToView]) {
-                 monthToView = getCurrentMonth();
+             
+             let periodToView = currentlyViewedPeriod;
+             if (!periodToView) {
+                 periodToView = getCurrentPeriod();
              }
-             currentlyViewedMonth = monthToView;
+             currentlyViewedPeriod = periodToView;
+             
+             const currentMonthKey = currentlyViewedPeriod.split('_')[0];
              if (!data[name].months) data[name].months = {};
-             if (!data[name].months[currentlyViewedMonth]) {
-                 data[name].months[currentlyViewedMonth] = { carriedOverBalance: 0, previousBalancePayments: [], days: [] };
+             if (!data[name].months[currentMonthKey]) {
+                 data[name].months[currentMonthKey] = { carriedOverBalance: 0, previousBalancePayments: [], days: [] };
              }
+             
              const rate = Number(data[name]?.rate) || 0;
              document.getElementById("userRate").value = rate === 0 ? '' : rate;
              const overtimeRate = Number(data[name]?.overtimeRate) || 8;
              document.getElementById("userOvertimeRate").value = overtimeRate === 8 ? '' : overtimeRate;
-             const monthDataForInput = data[name]?.months?.[currentlyViewedMonth];
+             const monthDataForInput = data[name]?.months?.[currentMonthKey];
              if (monthDataForInput) {
                  const carriedOver = monthDataForInput.carriedOverBalance || 0;
                  document.getElementById("manualCarriedOverBalance").value = Number(carriedOver) === 0 ? '' : Number(carriedOver);
              } else {
                  document.getElementById("manualCarriedOverBalance").value = '';
              }
-             updateMonthDisplay(); scheduleFullRender(150);
-            const dataManagementButtons = document.getElementById('dataManagementButtons');
-            if (dataManagementButtons.style.display === 'flex' || dataManagementButtons.style.display === 'block') {
-                const archiveBtn = document.getElementById('archiveUserBtn');
-                if (archiveBtn) {
-                    if (currentUser && data[currentUser]) { archiveBtn.style.display = 'inline-block'; applyTranslationsToUI(); }
-                    else { archiveBtn.style.display = 'none'; }
-                }
-                 const toggleArchivedBtn = document.getElementById('toggleArchivedUsersBtn');
-                  if (toggleArchivedBtn) {
-                    const hasArchived = Object.values(data).some(u => u.isActive === false);
-                    toggleArchivedBtn.style.display = hasArchived || showArchivedUsers ? 'inline-block' : 'none';
-                 }
-            }
+             
+             renderUserTabs();
+             populateOtherUserDropdown();
+             setTimeout(fullRender, 10); 
         }
 
         document.getElementById("userRate").addEventListener("input", (event) => {
@@ -1416,53 +1440,74 @@
                  const rateVal = parseFloat(event.target.value);
                  data[currentUser].rate = !isNaN(rateVal) && rateVal >= 0 ? rateVal : 0;
                  saveData();
-                 if (document.getElementById('summarySection').style.display === 'block') showSummary(activeReportType);
-                 if (document.getElementById('overallSummarySection').style.display === 'block') displayOverallReport();
-                 event.target.value = data[currentUser].rate === 0 ? '' : data[currentUser].rate;
+                 scheduleSummaryUpdate();
              }
         });
+         document.getElementById("userRate").addEventListener("change", (event) => {
+            if(currentUser && data[currentUser]){
+                event.target.value = data[currentUser].rate === 0 ? '' : data[currentUser].rate;
+            }
+         });
 
         document.getElementById("userOvertimeRate").addEventListener("input", (event) => {
             if (currentUser && data[currentUser]) {
-                const inputElement = event.target; let otRateVal = parseFloat(inputElement.value);
-                let valueToSave = (inputElement.value.trim() === '' || isNaN(otRateVal) || otRateVal <= 0) ? 8 : otRateVal;
-                update(null, -1, 'overtimeRate', valueToSave, inputElement);
-                 setTimeout(() => {
-                     const savedOtRate = Number(data[currentUser].overtimeRate) || 8;
-                     if (savedOtRate === 8 && inputElement.value.trim() !== '') inputElement.value = '';
-                     else if (savedOtRate !== 8 && parseFloat(inputElement.value) !== savedOtRate) inputElement.value = savedOtRate;
-                 }, 50);
-                 setTimeout(() => {
-                     if (document.getElementById('summarySection').style.display === 'block') showSummary(activeReportType);
-                     if (document.getElementById('overallSummarySection').style.display === 'block') displayOverallReport();
-                 }, 100);
+                const otRateVal = parseFloat(event.target.value);
+                data[currentUser].overtimeRate = (!isNaN(otRateVal) && otRateVal > 0) ? otRateVal : 8;
+                saveData();
+                scheduleSummaryUpdate();
+            }
+        });
+        document.getElementById("userOvertimeRate").addEventListener("change", (event) => {
+             if(currentUser && data[currentUser]){
+                event.target.value = data[currentUser].overtimeRate === 8 ? '' : data[currentUser].overtimeRate;
             }
         });
 
+        document.getElementById("manualCarriedOverBalance").addEventListener("input", (event) => {
+            if (!currentUser || !currentlyViewedPeriod) return;
+            const monthKey = currentlyViewedPeriod.split('_')[0];
+            if(!data[currentUser]?.months?.[monthKey]) return;
+            const balanceVal = parseFloat(event.target.value) || 0;
+            data[currentUser].months[monthKey].carriedOverBalance = balanceVal;
+            saveData();
+            scheduleSummaryUpdate();
+        });
         document.getElementById("manualCarriedOverBalance").addEventListener("change", (event) => {
-            if (!currentUser || !currentlyViewedMonth || !data[currentUser]?.months?.[currentlyViewedMonth]) {
-                 event.target.value = ''; return;
-             }
-              const balanceVal = parseFloat(event.target.value) || 0;
-              const monthData = data[currentUser].months[currentlyViewedMonth];
-              if (Math.abs(Number(balanceVal.toFixed(2)) - Number((monthData.carriedOverBalance || 0).toFixed(2))) > 0.001) {
-                   monthData.carriedOverBalance = balanceVal; saveData();
-                   if (document.getElementById('summarySection').style.display === 'block') showSummary(activeReportType);
-                   if (document.getElementById('overallSummarySection').style.display === 'block') displayOverallReport();
-              }
-              event.target.value = Number(monthData.carriedOverBalance) === 0 ? '' : Number(monthData.carriedOverBalance);
+             if (!currentUser || !currentlyViewedPeriod) return;
+             const monthKey = currentlyViewedPeriod.split('_')[0];
+             if(!data[currentUser]?.months?.[monthKey]) return;
+             event.target.value = data[currentUser].months[monthKey].carriedOverBalance === 0 ? '' : data[currentUser].months[monthKey].carriedOverBalance;
         });
 
-        function renderPreviousBalancePayments(monthKey) {
+        function renderPreviousBalancePayments() {
             const paymentListDiv = document.getElementById('paymentList'); paymentListDiv.innerHTML = '';
+            if (!currentUser || !currentlyViewedPeriod) {
+                 paymentListDiv.innerHTML = `<p>${translate('noPaymentsRecorded')}</p>`; return;
+            }
+            
+            const [monthKey, periodPart] = currentlyViewedPeriod.split('_');
             const payments = data[currentUser]?.months?.[monthKey]?.previousBalancePayments;
-            if (!currentUser || !monthKey || !Array.isArray(payments) || payments.length === 0) {
+
+            if (!Array.isArray(payments) || payments.length === 0) {
                 paymentListDiv.innerHTML = `<p>${translate('noPaymentsRecorded')}</p>`; return;
             }
-            const sortedPayments = [...payments].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            let periodPayments = payments;
+            if (calculationMode === 'halfMonth') {
+                periodPayments = payments.filter(p => {
+                    const paymentDay = new Date(p.date).getDate();
+                    return periodPart === '1' ? paymentDay <= 15 : paymentDay > 15;
+                });
+            }
+
+            if (periodPayments.length === 0) {
+                 paymentListDiv.innerHTML = `<p>${translate('noPaymentsRecorded')}</p>`; return;
+            }
+
+            const sortedPayments = [...periodPayments].sort((a, b) => new Date(b.date) - new Date(a.date));
             sortedPayments.forEach((p) => {
-                const actualIndex = payments.findIndex(origP => origP === p);
-                 if (!p || typeof p !== 'object' || p.amount === undefined) { return; }
+                const actualIndex = payments.findIndex(origP => origP.date === p.date && origP.amount === p.amount && origP.notes === p.notes);
+                 if (!p || typeof p !== 'object' || p.amount === undefined || actualIndex === -1) { return; }
                 const entry = document.createElement('div'); entry.className = 'payment-entry';
                 const details = document.createElement('span'); details.className = 'payment-details';
                 let paymentDateStr = translate('noDate');
@@ -1481,9 +1526,9 @@
             });
         }
         function addPreviousBalancePayment() {
-             if (!currentUser || !currentlyViewedMonth || !data[currentUser]?.months?.[currentlyViewedMonth]) {
+            if (!currentUser || !currentlyViewedPeriod || !data[currentUser]?.months?.[currentlyViewedPeriod.split('_')[0]]) {
                  alert(translate('alertSelectUserMonth')); return;
-             }
+            }
             const amountInput = document.getElementById('paymentAmount');
             const dateInput = document.getElementById('paymentDate');
             const notesInput = document.getElementById('paymentNotes');
@@ -1491,169 +1536,207 @@
             const paymentDateValue = dateInput.value;
             if (isNaN(amount) || amount <= 0) { alert(translate('alertEnterValidAmount')); return; }
             if (!paymentDateValue) { alert(translate('alertPaymentDateRequired')); return; }
-            const notes = notesInput.value.trim();
-            const monthData = data[currentUser].months[currentlyViewedMonth];
-            if(!Array.isArray(monthData.previousBalancePayments)) monthData.previousBalancePayments = [];
+            
             const [year, month, day] = paymentDateValue.split('-').map(Number);
+            const monthKeyForPayment = `${year}-${String(month).padStart(2,'0')}`;
+            const monthKeyFromPeriod = currentlyViewedPeriod.split('_')[0];
+            
+            if (monthKeyForPayment !== monthKeyFromPeriod) {
+                alert("Payment date must be in the currently viewed month.");
+                return;
+            }
+
+            const notes = notesInput.value.trim();
+            const monthData = data[currentUser].months[monthKeyForPayment];
+            if(!Array.isArray(monthData.previousBalancePayments)) monthData.previousBalancePayments = [];
+            
             const paymentDateObj = new Date(year, month - 1, day);
             monthData.previousBalancePayments.push({ amount, date: paymentDateObj.toISOString(), notes });
-            saveData(); renderPreviousBalancePayments(currentlyViewedMonth);
+            saveData(); 
+            renderPreviousBalancePayments();
             amountInput.value = ''; dateInput.value = ''; notesInput.value = '';
             alert(translate('alertPaymentAdded'));
-            if (document.getElementById('summarySection').style.display === 'block') showSummary(activeReportType);
-            if (document.getElementById('overallSummarySection').style.display === 'block') displayOverallReport();
+            scheduleSummaryUpdate();
         }
         function deletePreviousBalancePayment(monthKey, index) {
             const payments = data[currentUser]?.months?.[monthKey]?.previousBalancePayments;
             if (!payments || index < 0 || index >= payments.length || !payments[index]) { return; }
             const payment = payments[index];
             if (confirm(translate('confirmDeletePayment', {amount: (Number(payment.amount)||0).toFixed(2)}))) {
-                payments.splice(index, 1); saveData(); renderPreviousBalancePayments(monthKey);
+                payments.splice(index, 1); saveData(); 
+                renderPreviousBalancePayments();
                 alert(translate('alertPaymentDeleted'));
-                if (document.getElementById('summarySection').style.display === 'block') showSummary(activeReportType);
-                if (document.getElementById('overallSummarySection').style.display === 'block') displayOverallReport();
+                scheduleSummaryUpdate();
             }
         }
 
-        function updateMonthDisplay() {
+        function updatePeriodDisplay() {
             const monthDisplay = document.getElementById('currentMonthDisplay');
             const prevBtn = document.querySelector('#monthNav button:first-child');
             const nextBtn = document.querySelector('#monthNav button:last-child');
             const quickChangeBtn = document.getElementById('quickMonthChangeBtn');
             const manualBalanceInput = document.getElementById("manualCarriedOverBalance");
-            const overtimeRateInput = document.getElementById("userOvertimeRate");
 
-            if (monthDisplay && currentlyViewedMonth) {
-                const [year, monthNum] = currentlyViewedMonth.split('-').map(Number);
-                monthDisplay.textContent = `${new Intl.DateTimeFormat(currentLanguage === 'hi' ? 'hi-IN' : 'en-US', { month: 'long' }).format(new Date(year, monthNum - 1, 1))} ${year}`;
+            if (monthDisplay && currentlyViewedPeriod) {
+                const [monthKey, periodPart] = currentlyViewedPeriod.split('_');
+                const [year, monthNum] = monthKey.split('-').map(Number);
+                const monthName = new Intl.DateTimeFormat(currentLanguage === 'hi' ? 'hi-IN' : 'en-US', { month: 'long' }).format(new Date(year, monthNum - 1, 1));
+                
+                let displayText = `${monthName} ${year}`;
+                if (calculationMode === 'halfMonth') {
+                    displayText += ` (${periodPart === '1' ? '1-15' : '16-End'})`;
+                }
+                monthDisplay.textContent = displayText;
+
                 if (currentUser && data[currentUser]?.months) {
                     prevBtn.disabled = false;
-                    nextBtn.disabled = currentlyViewedMonth >= getCurrentMonth();
+                    nextBtn.disabled = currentlyViewedPeriod >= getCurrentPeriod();
                     if(quickChangeBtn) quickChangeBtn.style.display = 'inline-block';
-                    const monthData = data[currentUser].months[currentlyViewedMonth];
-                     if (manualBalanceInput) {
-                         manualBalanceInput.value = monthData && Number(monthData.carriedOverBalance) !== 0 ? Number(monthData.carriedOverBalance) : '';
-                     }
-                     if (overtimeRateInput && currentUser && data[currentUser]) {
-                         const overtimeRate = Number(data[currentUser].overtimeRate) || 8;
-                         overtimeRateInput.value = overtimeRate === 8 ? '' : overtimeRate;
+                    
+                    if (manualBalanceInput) {
+                         manualBalanceInput.disabled = (calculationMode === 'halfMonth' && periodPart === '2');
                      }
                 } else {
                     [prevBtn, nextBtn].forEach(b=>b.disabled=true);
                     if(quickChangeBtn) quickChangeBtn.style.display='none';
-                    if(manualBalanceInput) manualBalanceInput.value='';
-                    if(overtimeRateInput) overtimeRateInput.value = '';
+                    if(manualBalanceInput) manualBalanceInput.disabled = true;
                 }
             } else if (monthDisplay) {
                 monthDisplay.textContent = ''; [prevBtn, nextBtn].forEach(b=>b.disabled=true);
                 if(quickChangeBtn) quickChangeBtn.style.display='none';
-                if(manualBalanceInput) manualBalanceInput.value='';
-                if(overtimeRateInput) overtimeRateInput.value = '';
+                if(manualBalanceInput) manualBalanceInput.disabled = true;
             }
              checkReminders();
         }
 
-        function getRelativeMonthKey(monthKey, offset) {
-            if(!monthKey) return null;
-            const [y, m] = monthKey.split('-').map(Number); const date = new Date(y, m - 1, 1);
-            date.setMonth(date.getMonth() + offset);
-            return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`;
-        }
+        function goToPreviousPeriod() {
+            if(!currentUser || !currentlyViewedPeriod) return;
+            
+            const prevPeriod = getRelativePeriod(currentlyViewedPeriod, -1);
+            currentlyViewedPeriod = prevPeriod;
 
-        function goToPreviousMonth() {
-             if(currentUser && currentlyViewedMonth){
-                 const prevKey = getRelativeMonthKey(currentlyViewedMonth, -1);
-                 currentlyViewedMonth = prevKey;
-                 if (!data[currentUser].months[currentlyViewedMonth]) {
-                    data[currentUser].months[currentlyViewedMonth] = { carriedOverBalance: 0, previousBalancePayments: [], days: [] };
-                 }
-                 updateMonthDisplay(); scheduleFullRender(50);
-             }
-        }
-
-        function goToNextMonth() {
-            if (currentUser && currentlyViewedMonth && data[currentUser]) {
-                const currentMonthKey = currentlyViewedMonth; const nextMonthKey = getRelativeMonthKey(currentMonthKey, 1);
-                if (nextMonthKey > getCurrentMonth()) { alert(translate('cannotGoToFutureMonth')); return; }
-                const currentMonthFullTotals = calculateFullMonthTotals(currentUser, currentMonthKey);
-                const currentMonthData = data[currentUser].months[currentMonthKey];
-                const currentMonthCarried = Number(currentMonthData?.carriedOverBalance) || 0;
-                const currentMonthPrevBalPayments = (Array.isArray(currentMonthData?.previousBalancePayments))
-                    ? currentMonthData.previousBalancePayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0) : 0;
-                const previousMonthFinalBalance = (currentMonthFullTotals.grossTotal + currentMonthCarried) - currentMonthFullTotals.totalDailyReceived - currentMonthPrevBalPayments;
-                const monthNameForConfirm = new Intl.DateTimeFormat(currentLanguage === 'hi' ? 'hi-IN' : 'en-US', { month: 'long', year: 'numeric' })
-                                                .format(new Date(nextMonthKey.split('-')[0], nextMonthKey.split('-')[1] - 1, 1));
-                const confirmMessageKey = 'confirmCarryOverBalance';
-                const confirmMessageParams = { amount: previousMonthFinalBalance.toFixed(2), month: monthNameForConfirm };
-                let message = translate(confirmMessageKey, confirmMessageParams);
-                if (previousMonthFinalBalance !== 0 && confirm(message)) {
-                    if (!data[currentUser].months) data[currentUser].months = {};
-                    if (!data[currentUser].months[nextMonthKey]) {
-                        data[currentUser].months[nextMonthKey] = { carriedOverBalance: 0, previousBalancePayments: [], days: [] };
-                    }
-                    data[currentUser].months[nextMonthKey].carriedOverBalance = parseFloat(previousMonthFinalBalance.toFixed(2));
-                    saveData();
-                } else if (previousMonthFinalBalance === 0) {
-                     if (!data[currentUser].months) data[currentUser].months = {};
-                     if (!data[currentUser].months[nextMonthKey]) {
-                        data[currentUser].months[nextMonthKey] = { carriedOverBalance: 0, previousBalancePayments: [], days: [] };
-                     }
-                }
-                currentlyViewedMonth = nextMonthKey; updateMonthDisplay(); scheduleFullRender(50);
-            }
-        }
-
-        function promptQuickMonthChange() {
-             if(!currentUser){alert(translate('pleaseSelectUser')); return;}
-             const monthInput = prompt(translate('promptMonthInput'),currentlyViewedMonth||getCurrentMonth());
-             if(!monthInput) return; const trimmedInput = monthInput.trim();
-             if (!/^\d{4}-\d{2}$/.test(trimmedInput)){ alert(translate('alertInvalidMonthFormat')); return; }
-             const [year, monthNum] = trimmedInput.split('-').map(Number);
-             if(year < 1900 || year > 2100 || monthNum < 1 || monthNum > 12){ alert(translate('alertInvalidMonthFormat')); return; }
-             const newMonthKey = `${year}-${monthNum.toString().padStart(2, '0')}`;
-             if(newMonthKey > getCurrentMonth()){ alert(translate('cannotGoToFutureMonth')); return; }
-             if (!data[currentUser].months[newMonthKey]) {
+            const newMonthKey = currentlyViewedPeriod.split('_')[0];
+            if (!data[currentUser].months[newMonthKey]) {
                 data[currentUser].months[newMonthKey] = { carriedOverBalance: 0, previousBalancePayments: [], days: [] };
-             }
-             currentlyViewedMonth = newMonthKey; updateMonthDisplay(); scheduleFullRender(50);
-        }
-
-        function calculateFullMonthTotals(userName, monthKey) {
-            const userData = data[userName];
-            if (!userData?.months?.[monthKey] || !Array.isArray(userData.months[monthKey].days)) {
-                 return { totalPresent:0, totalOvertimeHours:0, totalRent:0, totalFood:0, totalDailyReceived:0, grossTotal:0 };
             }
-            const daysData = userData.months[monthKey].days; let p=0, ot=0, r=0, f=0, rec=0;
-            daysData.forEach(d => {
-                if(d && typeof d === 'object'){
-                    const statusText = (d.status||'').toUpperCase(); let dayAttendanceValue = 0;
-                    const multiplierMatch = statusText.match(/^(\d+)P$/);
-                    if (multiplierMatch) {
-                         const multiplier = parseInt(multiplierMatch[1]);
-                         if (!isNaN(multiplier) && multiplier > 0) dayAttendanceValue = multiplier;
-                    } else if (statusText === 'P') dayAttendanceValue = 1;
-                    else if (statusText === 'H') dayAttendanceValue = 0.5;
-                    p += dayAttendanceValue; ot+=Number(d.overtime)||0; r+=Number(d.rent)||0; f+=Number(d.food)||0; rec+=Number(d.received)||0;
-                }
-            });
-            const rate = Number(userData.rate)||0; const otRate = Number(userData.overtimeRate) || 8;
-            const hazri = p * rate; const otAmount = (rate > 0 && otRate > 0) ? (ot * rate) / otRate : 0;
-            const gross = hazri + otAmount + r + f;
-            return {
-                totalPresent: parseFloat(p.toFixed(2)), totalOvertimeHours: parseFloat(ot.toFixed(1)),
-                totalRent: parseFloat(r.toFixed(2)), totalFood: parseFloat(f.toFixed(2)),
-                totalDailyReceived: parseFloat(rec.toFixed(2)), grossTotal: parseFloat(gross.toFixed(2)),
-            };
+            scheduleFullRender();
         }
 
-        function calculatePeriodTotals(userName, monthKey, startDayIndex, endDayIndexExclusive) { // endDayIndex is exclusive for slice
+        function goToNextPeriod() {
+            if (!currentUser || !currentlyViewedPeriod) return;
+            
+            const nextPeriod = getRelativePeriod(currentlyViewedPeriod, 1);
+            if (nextPeriod > getCurrentPeriod()) {
+                alert(translate('cannotGoToFutureMonth'));
+                return;
+            }
+
+            const [currentMonthKey, currentPeriodPart] = currentlyViewedPeriod.split('_');
+            const currentMonthData = data[currentUser].months[currentMonthKey];
+            let balanceToCarry = 0;
+
+            if (calculationMode === 'fullMonth' || (calculationMode === 'halfMonth' && currentPeriodPart === '2')) {
+                const fullMonthTotals = calculatePeriodTotals(currentUser, currentMonthKey, 0, 31);
+                const prevBal = Number(currentMonthData?.carriedOverBalance) || 0;
+                const prevBalPayments = (currentMonthData?.previousBalancePayments || []).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+                balanceToCarry = (fullMonthTotals.periodGross + prevBal) - fullMonthTotals.totalDailyReceived - prevBalPayments;
+            } else if (calculationMode === 'halfMonth' && currentPeriodPart === '1') {
+                const firstHalfTotals = calculatePeriodTotals(currentUser, currentMonthKey, 0, 15);
+                const prevBal = Number(currentMonthData?.carriedOverBalance) || 0;
+                const firstHalfPayments = (currentMonthData?.previousBalancePayments || [])
+                    .filter(p => new Date(p.date).getDate() <= 15)
+                    .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+                balanceToCarry = (firstHalfTotals.periodGross + prevBal) - firstHalfTotals.totalDailyReceived - firstHalfPayments;
+            }
+
+            if (balanceToCarry !== 0 && (calculationMode === 'fullMonth' || (calculationMode === 'halfMonth' && currentPeriodPart === '2'))) {
+                 const [nextMonthKey, nextPeriodPart] = nextPeriod.split('_');
+                 const [nextY, nextM] = nextMonthKey.split('-').map(Number);
+                 let periodName = new Intl.DateTimeFormat(currentLanguage === 'hi' ? 'hi-IN' : 'en-US', { month: 'long', year: 'numeric' }).format(new Date(nextY, nextM - 1, 1));
+                 if(calculationMode === 'halfMonth') { periodName += ` (1-15)`; }
+
+                if (confirm(translate('confirmCarryOverBalance', { amount: balanceToCarry.toFixed(2), period: periodName }))) {
+                    const nextMonthKeyForData = nextPeriod.split('_')[0];
+                    if (!data[currentUser].months[nextMonthKeyForData]) {
+                        data[currentUser].months[nextMonthKeyForData] = { carriedOverBalance: 0, previousBalancePayments: [], days: [] };
+                    }
+                    data[currentUser].months[nextMonthKeyForData].carriedOverBalance = parseFloat(balanceToCarry.toFixed(2));
+                    saveData();
+                }
+            }
+            
+            currentlyViewedPeriod = nextPeriod;
+            const newMonthKey = currentlyViewedPeriod.split('_')[0];
+            if (!data[currentUser].months[newMonthKey]) {
+                data[currentUser].months[newMonthKey] = { carriedOverBalance: 0, previousBalancePayments: [], days: [] };
+            }
+
+            scheduleFullRender();
+        }
+        
+        function getRelativePeriod(period, offset) {
+            const [monthKey, periodPart] = period.split('_');
+            const [year, month] = monthKey.split('-').map(Number);
+            
+            if (calculationMode === 'fullMonth') {
+                const date = new Date(year, month - 1, 1);
+                date.setMonth(date.getMonth() + offset);
+                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            } else {
+                let currentAbsPeriod = (year * 24) + ((month - 1) * 2) + (periodPart === '1' ? 0 : 1);
+                currentAbsPeriod += offset;
+                const newYear = Math.floor(currentAbsPeriod / 24);
+                const newMonth = Math.floor((currentAbsPeriod % 24) / 2) + 1;
+                const newPeriodPart = (currentAbsPeriod % 2 === 0) ? '1' : '2';
+                return `${newYear}-${String(newMonth).padStart(2, '0')}_${newPeriodPart}`;
+            }
+        }
+
+        function promptQuickPeriodChange() {
+             if(!currentUser){alert(translate('pleaseSelectUser')); return;}
+             const promptText = translate('promptMonthInput');
+             const defaultVal = currentlyViewedPeriod || getCurrentPeriod();
+             const periodInput = prompt(promptText, defaultVal);
+             
+             if(!periodInput) return;
+             const trimmedInput = periodInput.trim();
+             const pattern = /^\d{4}-\d{2}(_([12]))?$/;
+             if (!pattern.test(trimmedInput)) {
+                 alert(translate('alertInvalidPeriodFormat'));
+                 return;
+             }
+             
+             const [monthKey, periodPart] = trimmedInput.split('_');
+             const [year, monthNum] = monthKey.split('-').map(Number);
+             if(year < 1900 || year > 2100 || monthNum < 1 || monthNum > 12){ 
+                 alert(translate('alertInvalidPeriodFormat')); 
+                 return; 
+             }
+             
+             let newPeriod = monthKey;
+             if (calculationMode === 'halfMonth') {
+                 newPeriod = `${monthKey}_${periodPart || '1'}`;
+             }
+             
+             if(newPeriod > getCurrentPeriod()){
+                 alert(translate('cannotGoToFutureMonth'));
+                 return;
+             }
+             
+             if (!data[currentUser].months[monthKey]) {
+                data[currentUser].months[monthKey] = { carriedOverBalance: 0, previousBalancePayments: [], days: [] };
+             }
+             currentlyViewedPeriod = newPeriod;
+             scheduleFullRender();
+        }
+
+        function calculatePeriodTotals(userName, monthKey, startDayIndex, endDayIndexExclusive) { 
             const userData = data[userName];
              if (!userData?.months?.[monthKey] || !Array.isArray(userData.months[monthKey].days)) {
                  return { totalPresent:0, totalOvertimeHours:0, totalRent:0, totalFood:0, totalDailyReceived:0, periodGross:0, periodNet:0 };
             }
              const actualDaysInMonthArray = userData.months[monthKey].days;
              const safeStart = Math.max(0, startDayIndex);
-             // Ensure endDayIndexExclusive does not exceed array length for slice
              const safeEndExclusive = Math.min(actualDaysInMonthArray.length, endDayIndexExclusive);
 
             const daysDataForPeriod = actualDaysInMonthArray.slice(safeStart, safeEndExclusive);
@@ -1674,7 +1757,7 @@
             const hazri = p * rate; const otAmount = (rate > 0 && otRate > 0) ? (ot * rate) / otRate : 0;
             const periodGross = hazri + otAmount + r + f; const periodNet = periodGross - rec;
             return {
-                 totalPresent: parseFloat(p.toFixed(2)), totalOvertimeHours: parseFloat(ot.toFixed(1)),
+                 totalPresent: parseFloat(p.toFixed(2)), totalOvertimeHours: parseFloat(ot.toFixed(2)),
                 totalRent: parseFloat(r.toFixed(2)), totalFood: parseFloat(f.toFixed(2)),
                 totalDailyReceived: parseFloat(rec.toFixed(2)),
                 periodGross: parseFloat(periodGross.toFixed(2)), periodNet: parseFloat(periodNet.toFixed(2))
@@ -1698,9 +1781,9 @@
             sortedMonthKeys.forEach(mKey => {
                  const mData = userData.months[mKey];
                  if (mData && typeof mData === 'object') {
-                      const mTots = calculateFullMonthTotals(userName, mKey);
+                      const mTots = calculatePeriodTotals(userName, mKey, 0, 31);
                       totP+=mTots.totalPresent; totOT+=mTots.totalOvertimeHours; totR+=mTots.totalRent;
-                      totF+=mTots.totalFood; totDR+=mTots.totalDailyReceived; totG+=mTots.grossTotal;
+                      totF+=mTots.totalFood; totDR+=mTots.totalDailyReceived; totG+=mTots.periodGross;
                       if (Array.isArray(mData.previousBalancePayments)) {
                            mData.previousBalancePayments.forEach(p => { if (p&&typeof p==='object'&&p.amount!==undefined) totPBP+=(Number(p.amount)||0); });
                       }
@@ -1708,7 +1791,7 @@
             });
             const overallFinBal = parseFloat((totG + initBal - totDR - totPBP).toFixed(2));
             return {
-                 totalOverallPresent:parseFloat(totP.toFixed(2)), totalOverallOvertimeHours:parseFloat(totOT.toFixed(1)),
+                 totalOverallPresent:parseFloat(totP.toFixed(2)), totalOverallOvertimeHours:parseFloat(totOT.toFixed(2)),
                  totalOverallRent:parseFloat(totR.toFixed(2)), totalOverallFood:parseFloat(totF.toFixed(2)),
                  totalOverallDailyReceived:parseFloat(totDR.toFixed(2)), totalOverallPrevBalPayments:parseFloat(totPBP.toFixed(2)),
                  totalOverallGross:parseFloat(totG.toFixed(2)), initialCarriedOverBalance:parseFloat(initBal.toFixed(2)),
@@ -1740,7 +1823,7 @@
             }
             let html = `<h3>${translate('overallReportTitle', { user: currentUser })}</h3>
                 <p>${translate('overallAttendanceSummary', { days: overallTotals.totalOverallPresent.toFixed(2) })}</p>
-                <p>${translate('overallOvertimeSummary', { hours: overallTotals.totalOverallOvertimeHours.toFixed(1) })}</p>
+                <p>${translate('overallOvertimeSummary', { hours: overallTotals.totalOverallOvertimeHours.toFixed(2) })}</p>
                 <p>${translate('overallRentSummary', { amount: overallTotals.totalOverallRent.toFixed(2) })}</p>
                 <p>${translate('overallFoodSummary', { amount: overallTotals.totalOverallFood.toFixed(2) })}</p>
                 <hr><p><strong>${translate('overallGrossSummary', { amount: overallTotals.totalOverallGross.toFixed(2) })}</strong></p>
@@ -1752,22 +1835,23 @@
             overallSummarySection.style.display = 'block';
             applyTranslationsToUI();
             const shareButtonWrapper = document.getElementById('shareReportButtonWrapper');
-             if(shareButtonWrapper) shareButtonWrapper.style.display = 'none';
+             if(shareButtonWrapper) shareButtonWrapper.style.display = 'flex';
              const footerDiv = document.getElementById('reportFooter');
              if(footerDiv) footerDiv.textContent = '';
         }
 
-        function updateTableFooter(monthKey) {
+        function updateTableFooter(monthKey, startDay, endDay) {
             const tableFooter = document.getElementById('attendanceTableFooter');
             if (!tableFooter) return;
-            if (activeReportType === 'fullMonth' && currentUser && monthKey && data[currentUser]?.months?.[monthKey]?.days) {
+
+            if (currentUser && monthKey && data[currentUser]?.months?.[monthKey]?.days) {
                 tableFooter.style.display = 'table-footer-group';
-                const totals = calculateFullMonthTotals(currentUser, monthKey);
-                document.getElementById('totalOvertime').textContent = totals.totalOvertimeHours.toFixed(1);
+                const totals = calculatePeriodTotals(currentUser, monthKey, startDay, endDay);
+                document.getElementById('totalOvertime').textContent = totals.totalOvertimeHours.toFixed(2);
                 document.getElementById('totalRent').textContent = totals.totalRent.toFixed(2);
                 document.getElementById('totalFood').textContent = totals.totalFood.toFixed(2);
                 document.getElementById('totalReceived').textContent = totals.totalDailyReceived.toFixed(2);
-                document.getElementById('totalStatus').textContent = totals.totalPresent.toFixed(1) + ' P';
+                document.getElementById('totalStatus').textContent = totals.totalPresent.toFixed(2) + ' P';
                 const totalLabelCell = document.querySelector('#tableFooterRow td[data-translate-key="totalLabel"]');
                 if(totalLabelCell) totalLabelCell.textContent = translate('totalLabel');
             } else {
@@ -1775,12 +1859,12 @@
             }
         }
 
-
-        function renderTable(monthKey = currentlyViewedMonth) {
+        function renderTable() {
             const container = document.getElementById("tableContainer");
-             if (!currentUser || !monthKey) { container.innerHTML = ""; return; }
+             if (!currentUser || !currentlyViewedPeriod) { container.innerHTML = ""; return; }
              const userData = data[currentUser]; if (!userData) { container.innerHTML = ""; return; }
 
+             const [monthKey, periodPart] = currentlyViewedPeriod.split('_');
              const [year, monthIndexBase1] = monthKey.split('-').map(Number);
              if (isNaN(year) || year < 1900 || isNaN(monthIndexBase1) || monthIndexBase1 < 1 || monthIndexBase1 > 12) {
                  container.innerHTML = `<p>${translate('errorInvalidMonthKey', { monthKey: monthKey })}</p>`; return;
@@ -1801,140 +1885,109 @@
                         };
                    });
                    userData.months[monthKey].days = newDays; fullMonthDaysData = newDays; structureChanged = true;
-                } else {
-                     let dayMigrationNeeded = false;
-                     fullMonthDaysData = fullMonthDaysData.map((d, i) => {
-                          if (!d || typeof d !== 'object') {
-                              dayMigrationNeeded = true;
-                              return { date: `${i+1}/${monthIndexBase1}/${year}`, status:'', overtime:0, rent:0, food:0, received:0, notes:'', updated:'' };
-                          }
-                           let updatedDay = {...d};
-                           if (updatedDay.date === undefined) { updatedDay.date = `${i+1}/${monthIndexBase1}/${year}`; dayMigrationNeeded = true; }
-                           if (updatedDay.status === undefined) { updatedDay.status = ''; dayMigrationNeeded = true; }
-                           if (updatedDay.overtime === undefined || isNaN(Number(updatedDay.overtime))) { updatedDay.overtime = 0; dayMigrationNeeded = true; }
-                           if (updatedDay.rent === undefined || isNaN(Number(updatedDay.rent))) { updatedDay.rent = 0; dayMigrationNeeded = true; }
-                           if (updatedDay.food === undefined || isNaN(Number(updatedDay.food))) { updatedDay.food = 0; dayMigrationNeeded = true; }
-                           if (updatedDay.received === undefined || isNaN(Number(updatedDay.received))) { updatedDay.received = 0; dayMigrationNeeded = true; }
-                           if (updatedDay.notes === undefined) { updatedDay.notes = ''; dayMigrationNeeded = true; }
-                           if (updatedDay.updated === undefined) { updatedDay.updated = ''; dayMigrationNeeded = true; }
-                            if (updatedDay.location !== undefined) { delete updatedDay.location; dayMigrationNeeded = true; }
-                           return updatedDay;
-                     });
-                      if (dayMigrationNeeded) { userData.months[monthKey].days = fullMonthDaysData; structureChanged = true; }
                 }
-                if (typeof userData.months[monthKey].carriedOverBalance !== 'number') { userData.months[monthKey].carriedOverBalance = 0; structureChanged = true; }
-                 if (!Array.isArray(userData.months[monthKey].previousBalancePayments)) { userData.months[monthKey].previousBalancePayments = []; structureChanged = true; }
                 if (structureChanged) { saveData(); }
 
             let displayStartIndex = 0;
             let displayEndIndex = daysInSelectedMonth - 1;
-            if (activeReportType === 'firstHalfIndependent' || activeReportType === 'firstHalfCurrent') {
-                displayEndIndex = Math.min(14, daysInSelectedMonth - 1);
-            } else if (activeReportType === 'afterFifteenthIndependent' || activeReportType === 'afterFifteenthCurrent') {
-                displayStartIndex = Math.min(15, daysInSelectedMonth -1);
-                if (displayStartIndex > displayEndIndex && daysInSelectedMonth > 0) { // Check daysInSelectedMonth > 0
-                    container.innerHTML = `<p>${translate('noDataForMonth', { monthKey: monthKey + " (" + activeReportType.substring(activeReportType.lastIndexOf("f")) + ")"})}</p>`; return;
+
+            if (calculationMode === 'halfMonth') {
+                if (periodPart === '1') {
+                    displayEndIndex = Math.min(14, daysInSelectedMonth - 1);
+                } else { 
+                    displayStartIndex = Math.min(15, daysInSelectedMonth -1);
                 }
             }
-             if (daysInSelectedMonth === 0 && activeReportType !== 'fullMonth') { // Handle empty month for period views
-                container.innerHTML = `<p>${translate('noDataForMonth', { monthKey: monthKey + " (" + activeReportType.substring(activeReportType.lastIndexOf("f")) + ")"})}</p>`; return;
+
+            if (displayStartIndex > displayEndIndex && daysInSelectedMonth > 0) {
+                container.innerHTML = `<p>${translate('noDataForMonth', { monthKey: monthKey + " (invalid period)"})}</p>`; return;
             }
 
             const daysToDisplayInTable = (daysInSelectedMonth > 0) ? fullMonthDaysData.slice(displayStartIndex, displayEndIndex + 1) : [];
-            if (daysToDisplayInTable.length === 0 && activeReportType !== 'fullMonth' && daysInSelectedMonth > 0) {
-                 container.innerHTML = `<p>${translate('noDataForMonth', { monthKey: monthKey + " (" + activeReportType.substring(activeReportType.lastIndexOf("f")) + ")"})}</p>`; return;
-            } else if (daysToDisplayInTable.length === 0 && daysInSelectedMonth === 0) { // Handles completely empty/new month
-                 container.innerHTML = `<p>${translate('noDataForMonth', { monthKey: monthKey})}</p>`; return;
+            if (daysToDisplayInTable.length === 0 && daysInSelectedMonth > 0) {
+                 container.innerHTML = `<p>${translate('noDataForMonth', { monthKey: currentlyViewedPeriod })}</p>`; return;
+            } else if (daysInSelectedMonth === 0) {
+                 container.innerHTML = `<p>${translate('noDataForMonth', { monthKey: monthKey })}</p>`; return;
             }
 
+            const todayDateString = getCurrentDateString();
+            let html = `<div class="table-responsive"><table><thead><tr>
+                        <th>${translate('dateHeaderTbl')}</th><th>${translate('statusHeaderTbl')}</th>
+                        <th>${translate('otHeaderTbl')}</th><th>${translate('rentHeaderTbl')}</th>
+                        <th>${translate('foodHeaderTbl')}</th><th>${translate('receivedHeaderTbl')}</th>
+                        <th>${translate('notesHeaderTbl')}</th><th>${translate('editedHeaderTbl')}</th>
+                        </tr></thead><tbody>`;
 
-              const todayDateString = getCurrentDateString();
-              let html = `<div class="table-responsive"><table><thead><tr>
-                          <th>${translate('dateHeaderTbl')}</th><th>${translate('statusHeaderTbl')}</th>
-                          <th>${translate('otHeaderTbl')}</th><th>${translate('rentHeaderTbl')}</th>
-                          <th>${translate('foodHeaderTbl')}</th><th>${translate('receivedHeaderTbl')}</th>
-                          <th>${translate('notesHeaderTbl')}</th><th>${translate('editedHeaderTbl')}</th>
-                          </tr></thead><tbody>`;
-
-             daysToDisplayInTable.forEach((dayDataFromSlice, relativeIndex) => {
-                  const originalDayIndex = displayStartIndex + relativeIndex;
-                  const currentDay = dayDataFromSlice;
-                  const dayDateParts = (currentDay.date || '').split('/').map(Number);
-                   const dayDateObj = (dayDateParts.length === 3 && !isNaN(dayDateParts[0]) && !isNaN(dayDateParts[1]) && !isNaN(dayDateParts[2]))
-                                       ? new Date(dayDateParts[2], dayDateParts[1] - 1, dayDateParts[0]) : null;
-                  const formattedDayDateString = dayDateObj ? `${dayDateObj.getDate()}/${dayDateObj.getMonth()+1}/${dayDateObj.getFullYear()}` : '';
-                  const isCurrentDayRow = formattedDayDateString === todayDateString;
-                  let dayName = ''; let dateDisplay = currentDay.date || '-'; let dayOfWeekClass = '';
-                  if (dayDateObj && !isNaN(dayDateObj.getTime())) {
-                      dayName = new Intl.DateTimeFormat(currentLanguage === 'hi' ? 'hi-IN' : 'en-US', { weekday: 'long' }).format(dayDateObj);
-                      const dayIndexInWeek = dayDateObj.getDay();
-                      if (dayIndexInWeek === 0) dayOfWeekClass = 'sunday-row'; else if (dayIndexInWeek === 5) dayOfWeekClass = 'friday-row';
-                  }
-                  let finalRowClass = isCurrentDayRow ? 'current-day-row' : '';
-                  if (dayOfWeekClass) finalRowClass += (finalRowClass ? ' ' : '') + dayOfWeekClass;
-                  const overtimeValue = Number(currentDay.overtime) === 0 ? '' : String(currentDay.overtime);
-                  const rentValue = Number(currentDay.rent) === 0 ? '' : String(currentDay.rent);
-                  const foodValue = Number(currentDay.food) === 0 ? '' : String(currentDay.food);
-                  const receivedValue = Number(currentDay.received) === 0 ? '' : String(currentDay.received);
-                  const rentTdClass = `rent-cell ${rentValue !== '' ? 'input-has-value' : ''}`;
-                  const foodTdClass = `food-cell ${foodValue !== '' ? 'input-has-value' : ''}`;
-                  const receivedTdClass = `received-cell ${receivedValue !== '' ? 'input-has-value' : ''}`;
-                  html += `<tr class="${finalRowClass}">
-                       <td>
-                           ${dayName ? `<span class="day-name-in-date-cell">${dayName}</span>` : ''}
-                           ${dateDisplay}
-                       </td>
-                       <td><input type="text" data-month="${monthKey}" data-index="${originalDayIndex}" data-field="status" value="${currentDay.status || ''}" maxlength="3" autocomplete="off"></td>
-                       <td><input type="number" step="0.1" data-month="${monthKey}" data-index="${originalDayIndex}" data-field="overtime" value="${overtimeValue}" min="0" autocomplete="off"></td>
-                       <td class="${rentTdClass}"><input type="number" step="any" data-month="${monthKey}" data-index="${originalDayIndex}" data-field="rent" value="${rentValue}" min="0" autocomplete="off"></td>
-                       <td class="${foodTdClass}"><input type="number" step="any" data-month="${monthKey}" data-index="${originalDayIndex}" data-field="food" value="${foodValue}" min="0" autocomplete="off"></td>
-                       <td class="${receivedTdClass}"><input type="number" step="any" data-month="${monthKey}" data-index="${originalDayIndex}" data-field="received" value="${receivedValue}" min="0" autocomplete="off"></td>
-                       <td class="notes-cell" onclick="openNotesModal('${monthKey}', ${originalDayIndex})" title="${translate('notesPlaceholder')}">
-                           <span class="note-preview">${(currentDay.notes || '').substring(0, 20)}${(currentDay.notes || '').length > 20 ? '...' : ''}</span>
-                       </td>
-                       <td class="edited-datetime-cell">
-                           <input type="text" class="edited-date-input" data-month="${monthKey}" data-index="${originalDayIndex}" data-field="updated_date"
-                                  placeholder="${translate('editedDatePlaceholder')}"
-                                  value="${currentDay.updated ? new Date(currentDay.updated).toLocaleDateString(currentLanguage === 'hi' ? 'hi-IN-u-hc-h12' : 'en-GB', {day: '2-digit', month: '2-digit', year: 'numeric'}).replace(/\//g, '-') : ''}"
-                                  maxlength="10" autocomplete="off">
-                           <input type="text" class="edited-time-input" data-month="${monthKey}" data-index="${originalDayIndex}" data-field="updated_time"
-                                  placeholder="${translate('editedTimePlaceholder')}"
-                                  value="${currentDay.updated ? new Date(currentDay.updated).toLocaleTimeString(currentLanguage === 'hi' ? 'hi-IN-u-hc-h12' : 'en-GB', {hour: '2-digit', minute: '2-digit', hourCycle: 'h23'}) : ''}"
-                                  maxlength="5" autocomplete="off">
-                       </td></tr>`;
-             });
-             html += `</tbody>
-                      <tfoot id="attendanceTableFooter" style="display: none;">
-                          <tr id="tableFooterRow">
-                              <td data-translate-key="totalLabel">Total</td>
-                              <td id="totalStatus"></td>
-                              <td id="totalOvertime">0</td>
-                              <td id="totalRent">0</td>
-                              <td id="totalFood">0</td>
-                              <td id="totalReceived">0</td>
-                              <td></td>
-                              <td></td>
-                          </tr>
-                      </tfoot>`;
-             html += `</table></div>`; container.innerHTML = html;
-             addTableEventListeners();
-             renderPreviousBalancePayments(monthKey);
-             updateTableFooter(monthKey);
-             const manualBalanceInput = document.getElementById("manualCarriedOverBalance");
-             if (manualBalanceInput && currentUser && monthKey && data[currentUser]?.months?.[monthKey]) {
-                 const monthData = data[currentUser].months[monthKey];
-                 manualBalanceInput.value = Number(monthData.carriedOverBalance) === 0 ? '' : Number(monthData.carriedOverBalance);
-             } else if (manualBalanceInput) { manualBalanceInput.value = ''; }
-             const overtimeRateInput = document.getElementById("userOvertimeRate");
-             if (overtimeRateInput && currentUser && data[currentUser]) {
-                 const overtimeRate = Number(data[currentUser].overtimeRate) || 8;
-                 overtimeRateInput.value = overtimeRate === 8 ? '' : overtimeRate;
-             } else if (overtimeRateInput) { overtimeRateInput.value = ''; }
-             container.querySelectorAll('td.rent-cell input, td.food-cell input, td.received-cell input').forEach(input => {
-                const td = input.parentElement;
-                if (input.value.trim() !== '') td.classList.add('input-has-value'); else td.classList.remove('input-has-value');
-             });
-             applyTranslationsToUI();
+            daysToDisplayInTable.forEach((dayDataFromSlice, relativeIndex) => {
+                const originalDayIndex = displayStartIndex + relativeIndex;
+                const currentDay = dayDataFromSlice;
+                const dayDateParts = (currentDay.date || '').split('/').map(Number);
+                const dayDateObj = (dayDateParts.length === 3 && !isNaN(dayDateParts[0]) && !isNaN(dayDateParts[1]) && !isNaN(dayDateParts[2]))
+                                    ? new Date(dayDateParts[2], dayDateParts[1] - 1, dayDateParts[0]) : null;
+                const formattedDayDateString = dayDateObj ? `${dayDateObj.getDate()}/${dayDateObj.getMonth()+1}/${dayDateObj.getFullYear()}` : '';
+                const isCurrentDayRow = formattedDayDateString === todayDateString;
+                let dayName = ''; let dateDisplay = currentDay.date || '-'; let dayOfWeekClass = '';
+                if (dayDateObj && !isNaN(dayDateObj.getTime())) {
+                    dayName = new Intl.DateTimeFormat(currentLanguage === 'hi' ? 'hi-IN' : 'en-US', { weekday: 'long' }).format(dayDateObj);
+                    const dayIndexInWeek = dayDateObj.getDay();
+                    if (dayIndexInWeek === 0) dayOfWeekClass = 'sunday-row'; else if (dayIndexInWeek === 5) dayOfWeekClass = 'friday-row';
+                }
+                let finalRowClass = isCurrentDayRow ? 'current-day-row' : '';
+                if (dayOfWeekClass) finalRowClass += (finalRowClass ? ' ' : '') + dayOfWeekClass;
+                const overtimeValue = Number(currentDay.overtime) === 0 ? '' : String(currentDay.overtime);
+                const rentValue = Number(currentDay.rent) === 0 ? '' : String(currentDay.rent);
+                const foodValue = Number(currentDay.food) === 0 ? '' : String(currentDay.food);
+                const receivedValue = Number(currentDay.received) === 0 ? '' : String(currentDay.received);
+                const rentTdClass = `rent-cell ${rentValue !== '' ? 'input-has-value' : ''}`;
+                const foodTdClass = `food-cell ${foodValue !== '' ? 'input-has-value' : ''}`;
+                const receivedTdClass = `received-cell ${receivedValue !== '' ? 'input-has-value' : ''}`;
+                html += `<tr class="${finalRowClass}">
+                    <td>
+                        ${dayName ? `<span class="day-name-in-date-cell">${dayName}</span>` : ''}
+                        ${dateDisplay}
+                    </td>
+                    <td><input type="text" data-month="${monthKey}" data-index="${originalDayIndex}" data-field="status" value="${currentDay.status || ''}" maxlength="3" autocomplete="off"></td>
+                    <td><input type="number" step="any" data-month="${monthKey}" data-index="${originalDayIndex}" data-field="overtime" value="${overtimeValue}" min="0" autocomplete="off"></td>
+                    <td class="${rentTdClass}"><input type="number" step="any" data-month="${monthKey}" data-index="${originalDayIndex}" data-field="rent" value="${rentValue}" min="0" autocomplete="off"></td>
+                    <td class="${foodTdClass}"><input type="number" step="any" data-month="${monthKey}" data-index="${originalDayIndex}" data-field="food" value="${foodValue}" min="0" autocomplete="off"></td>
+                    <td class="${receivedTdClass}"><input type="number" step="any" data-month="${monthKey}" data-index="${originalDayIndex}" data-field="received" value="${receivedValue}" min="0" autocomplete="off"></td>
+                    <td class="notes-cell" onclick="openNotesModal('${monthKey}', ${originalDayIndex})" title="${translate('notesPlaceholder')}">
+                        <span class="note-preview">${(currentDay.notes || '').substring(0, 20)}${(currentDay.notes || '').length > 20 ? '...' : ''}</span>
+                    </td>
+                    <td class="edited-datetime-cell">
+                        <input type="text" class="edited-date-input" data-month="${monthKey}" data-index="${originalDayIndex}" data-field="updated_date"
+                                placeholder="${translate('editedDatePlaceholder')}"
+                                value="${currentDay.updated ? new Date(currentDay.updated).toLocaleDateString(currentLanguage === 'hi' ? 'hi-IN-u-hc-h12' : 'en-GB', {day: '2-digit', month: '2-digit', year: 'numeric'}).replace(/\//g, '-') : ''}"
+                                maxlength="10" autocomplete="off">
+                        <input type="text" class="edited-time-input" data-month="${monthKey}" data-index="${originalDayIndex}" data-field="updated_time"
+                                placeholder="${translate('editedTimePlaceholder')}"
+                                value="${currentDay.updated ? new Date(currentDay.updated).toLocaleTimeString(currentLanguage === 'hi' ? 'hi-IN-u-hc-h12' : 'en-GB', {hour: '2-digit', minute: '2-digit', hourCycle: 'h23'}) : ''}"
+                                maxlength="5" autocomplete="off">
+                    </td></tr>`;
+            });
+            html += `</tbody>
+                    <tfoot id="attendanceTableFooter" style="display: none;">
+                        <tr id="tableFooterRow">
+                            <td data-translate-key="totalLabel">Total</td>
+                            <td id="totalStatus"></td>
+                            <td id="totalOvertime">0</td>
+                            <td id="totalRent">0</td>
+                            <td id="totalFood">0</td>
+                            <td id="totalReceived">0</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>`;
+            html += `</table></div>`; container.innerHTML = html;
+            addTableEventListeners();
+            renderPreviousBalancePayments();
+            updateTableFooter(monthKey, displayStartIndex, displayEndIndex + 1);
+            
+            container.querySelectorAll('td.rent-cell input, td.food-cell input, td.received-cell input').forEach(input => {
+               const td = input.parentElement;
+               if (input.value.trim() !== '') td.classList.add('input-has-value'); else td.classList.remove('input-has-value');
+            });
+            applyTranslationsToUI();
         }
 
         function addTableEventListeners() {
@@ -1956,44 +2009,24 @@
                      else {
                          valueToStore = parseFloat(rawValue);
                          if (isNaN(valueToStore)) valueToStore = 0;
-                         else if (valueToStore < 0 && field !== 'manualCarriedOverBalance') valueToStore = 0;
+                         else if (valueToStore < 0) valueToStore = 0;
                      }
-                     update(month, dayIndex, field, valueToStore, target);
+                     update(month, dayIndex, field, valueToStore);
                  } else if (field === 'status') {
                       valueToStore = rawValue.trim().toUpperCase();
                        const isValidStatus = valueToStore === '' || /^[PHAL]$/.test(valueToStore) || /^\d+P$/.test(valueToStore);
                        if (!isValidStatus && valueToStore !== '') {
                             target.value = data[currentUser]?.months?.[month]?.days?.[dayIndex]?.[field] || ''; return;
                        }
-                       update(month, dayIndex, field, valueToStore, target);
+                       update(month, dayIndex, field, valueToStore);
                  } else if (field === 'updated_date' || field === 'updated_time') {
-                     valueToStore = rawValue.trim(); update(month, dayIndex, field, valueToStore, target);
+                     valueToStore = rawValue.trim(); 
+                     update(month, dayIndex, field, valueToStore);
                  }
              }
         }
 
-        function update(month, i, field, value, inputElement) {
-            if (i === -1 && currentUser && data[currentUser]) {
-                 const user = data[currentUser]; let valueChanged = false;
-                 if (field === 'overtimeRate') {
-                      const oldVal = user.overtimeRate || 8;
-                      user.overtimeRate = (value === '' || isNaN(parseFloat(value)) || parseFloat(value) <=0 ) ? 8 : parseFloat(value);
-                      valueChanged = user.overtimeRate !== oldVal;
-                 } else if (field === 'rate') {
-                      const oldVal = user.rate || 0;
-                      user.rate = (value === '' || isNaN(parseFloat(value))) ? 0 : parseFloat(value);
-                      valueChanged = user.rate !== oldVal;
-                 }
-                 if (valueChanged) saveData();
-                 if (inputElement) {
-                     if (field === 'overtimeRate') inputElement.value = (user.overtimeRate === 8) ? '' : user.overtimeRate;
-                     else if (field === 'rate') inputElement.value = (user.rate === 0) ? '' : user.rate;
-                 }
-                if (document.getElementById('summarySection').style.display === 'block') showSummary(activeReportType);
-                if (document.getElementById('overallSummarySection').style.display === 'block') displayOverallReport();
-                return;
-            }
-
+        function update(month, i, field, value) {
             if (!currentUser || !data[currentUser]?.months?.[month]?.days?.[i]) { return; }
             const day = data[currentUser].months[month].days[i];
 
@@ -2001,14 +2034,18 @@
                 const dateInput = document.querySelector(`input[data-month="${month}"][data-index="${i}"][data-field="updated_date"]`);
                 const timeInput = document.querySelector(`input[data-month="${month}"][data-index="${i}"][data-field="updated_time"]`);
                 let dateStr = dateInput.value.trim(); let timeStr = timeInput.value.trim();
-                if ((field === 'updated_date' && !dateStr && !timeStr) || (field === 'updated_time' && !timeStr && !dateStr)) {
-                     if (day.updated) { day.updated = ''; saveData(); }
-                    if (!dateStr) dateInput.value = ''; if (!timeStr) timeInput.value = '';
-                    if (document.getElementById('summarySection').style.display === 'block') showSummary(activeReportType);
-                    if (document.getElementById('overallSummarySection').style.display === 'block') displayOverallReport();
+
+                const datePattern = /^\d{1,2}-\d{1,2}-\d{4}$/; const timePattern = /^\d{1,2}:\d{1,2}$/;
+                
+                if (!dateStr && !timeStr) {
+                    if (day.updated) { 
+                        day.updated = ''; 
+                        saveData(); 
+                        scheduleSummaryUpdate(); 
+                    }
                     return;
                 }
-                const datePattern = /^\d{1,2}-\d{1,2}-\d{4}$/; const timePattern = /^\d{1,2}:\d{1,2}$/;
+                
                 if (dateStr && timeStr && datePattern.test(dateStr) && timePattern.test(timeStr)) {
                     const dateParts = dateStr.split('-'); const timeParts = timeStr.split(':');
                     if (dateParts.length === 3 && timeParts.length === 2) {
@@ -2020,26 +2057,15 @@
                             hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
                             const parsedDate = new Date(year, monthParsed - 1, dayParsed, hours, minutes);
                             if (!isNaN(parsedDate.getTime())) {
-                                const oldUpdatedValue = day.updated; day.updated = parsedDate.toISOString();
+                                const oldUpdatedValue = day.updated; 
+                                day.updated = parsedDate.toISOString();
                                 if (oldUpdatedValue !== day.updated) {
                                     saveData();
-                                    if (document.getElementById('summarySection').style.display === 'block') showSummary(activeReportType);
-                                    if (document.getElementById('overallSummarySection').style.display === 'block') displayOverallReport();
+                                    scheduleSummaryUpdate();
                                 }
-                                dateInput.value = parsedDate.toLocaleDateString(currentLanguage === 'hi' ? 'hi-IN-u-hc-h12' : 'en-GB', {day: '2-digit', month: '2-digit', year: 'numeric'}).replace(/\//g, '-');
-                                timeInput.value = parsedDate.toLocaleTimeString(currentLanguage === 'hi' ? 'hi-IN-u-hc-h12' : 'en-GB', {hour: '2-digit', minute: '2-digit', hourCycle: 'h23'});
-                            } else { if (inputElement !== document.activeElement) alert(translate('alertInvalidDateTimeFormat')); }
-                        } else {
-                            if (inputElement !== document.activeElement || (field==='updated_date' && value.length >= 10 || field==='updated_time' && value.length >= 5 )) {
-                                alert(translate('alertInvalidDateTimeFormat'));
                             }
                         }
                     }
-                } else if (inputElement === document.activeElement) { /* User is still typing */ }
-                else if (!dateStr && !timeStr && day.updated) {
-                     day.updated = ''; saveData();
-                     if (document.getElementById('summarySection').style.display === 'block') showSummary(activeReportType);
-                     if (document.getElementById('overallSummarySection').style.display === 'block') displayOverallReport();
                 }
                 return;
             }
@@ -2050,34 +2076,23 @@
             } else {
                 valueChanged = String(value) !== String(currentValueInData || '');
             }
+
             if (valueChanged) {
                 day[field] = value;
                 day.updated = new Date().toISOString();
                 const dateInputElement = document.querySelector(`input[data-month="${month}"][data-index="${i}"][data-field="updated_date"]`);
                 const timeInputElement = document.querySelector(`input[data-month="${month}"][data-index="${i}"][data-field="updated_time"]`);
-                if (dateInputElement && timeInputElement && day.updated) {
-                    dateInputElement.value = new Date(day.updated).toLocaleDateString(currentLanguage === 'hi' ? 'hi-IN-u-hc-h12' : 'en-GB', {day: '2-digit', month: '2-digit', year: 'numeric'}).replace(/\//g, '-');
-                    timeInputElement.value = new Date(day.updated).toLocaleTimeString(currentLanguage === 'hi' ? 'hi-IN-u-hc-h12' : 'en-GB', {hour: '2-digit', minute: '2-digit', hourCycle: 'h23'});
+                if (dateInputElement && timeInputElement) {
+                    const d = new Date(day.updated);
+                    dateInputElement.value = d.toLocaleDateString(currentLanguage === 'hi' ? 'hi-IN-u-hc-h12' : 'en-GB', {day: '2-digit', month: '2-digit', year: 'numeric'}).replace(/\//g, '-');
+                    timeInputElement.value = d.toLocaleTimeString(currentLanguage === 'hi' ? 'hi-IN-u-hc-h12' : 'en-GB', {hour: '2-digit', minute: '2-digit', hourCycle: 'h23'});
                 }
                 saveData();
-            }
-            if (inputElement && ['overtime', 'rent', 'food', 'received'].includes(field)) {
-                const savedNumericValue = Number(day[field]) || 0;
-                if (document.activeElement !== inputElement) {
-                    inputElement.value = (savedNumericValue === 0) ? '' : String(savedNumericValue);
-                }
-            }
-            if (valueChanged) {
-                if (document.getElementById('summarySection').style.display === 'block') showSummary(activeReportType);
-                if (document.getElementById('overallSummarySection').style.display === 'block') displayOverallReport();
-                 updateTableFooter(month);
+                scheduleSummaryUpdate();
             }
         }
 
-        function showSummary(calcType) {
-            activeReportType = calcType;
-            localStorage.setItem('activeReportType', activeReportType); // Save to localStorage
-
+        function showSummary() {
             const monthlySummary = document.getElementById("summarySection");
             const overallSummary = document.getElementById("overallSummarySection");
             const tableContainer = document.getElementById('tableContainer');
@@ -2093,178 +2108,72 @@
             if(shareButtonWrapper) shareButtonWrapper.style.display = 'flex';
             if(footerDiv) footerDiv.textContent = '';
             
-            if(currentUser && currentlyViewedMonth) { // Render table based on new activeReportType
-                renderTable(currentlyViewedMonth);
-            }
-
-            let selectedOtherUser = otherUserSelect ? otherUserSelect.value : '';
-            if (selectedOtherUser === '') selectedOtherUser = null;
-
-            if (!currentUser || !currentlyViewedMonth || !data[currentUser]?.months?.[currentlyViewedMonth]) {
+            if (!currentUser || !currentlyViewedPeriod) {
                 monthlySummary.innerHTML = `<p>${translate('alertSelectUserMonth')}</p>`;
-                finalBalanceForReport = 0; combinedFinalBalanceForReport = 0; otherUserFinalBalanceForReport = 0;
-                 if(shareButtonWrapper) shareButtonWrapper.style.display = 'none';
-                 if(footerDiv) footerDiv.textContent = '';
-                 updateTableFooter(currentlyViewedMonth);
                 return;
             }
 
-            const userData = data[currentUser]; const currentMonthKey = currentlyViewedMonth;
-            const currentMonthData = userData.months[currentMonthKey];
-            if (!currentMonthData || typeof currentMonthData !== 'object' || !Array.isArray(currentMonthData.days) || !Array.isArray(currentMonthData.previousBalancePayments)) {
-                 monthlySummary.innerHTML = `<p>${translate('noDataForMonth', {monthKey: currentMonthKey})}</p>`;
-                 finalBalanceForReport = 0; combinedFinalBalanceForReport = 0; otherUserFinalBalanceForReport = 0;
-                 if(shareButtonWrapper) shareButtonWrapper.style.display = 'none'; if(footerDiv) footerDiv.textContent = '';
-                 updateTableFooter(currentlyViewedMonth);
+            const [monthKey, periodPart] = currentlyViewedPeriod.split('_');
+            const userData = data[currentUser];
+            const currentMonthData = userData?.months?.[monthKey];
+
+            if (!currentMonthData) {
+                 monthlySummary.innerHTML = `<p>${translate('noDataForMonth', {monthKey: monthKey})}</p>`;
                  return;
             }
-
+            
             let currentPeriodCarriedOverBalance = 0;
             let currentPeriodPrevBalPaymentsTotal = 0;
-            let finalBalanceContextKey = 'finalBalanceDueForPeriod';
             let carriedOverBalanceContextKey = 'carriedOverBalanceFromPrevMonth';
-
-            const [year, monthNum] = currentMonthKey.split('-').map(Number);
-            const monthNameForTitle = new Intl.DateTimeFormat(currentLanguage === 'hi' ? 'hi-IN' : 'en-US', { month: 'long' }).format(new Date(year, monthNum - 1, 1));
-            const actualDaysInMonth = currentMonthData.days.length;
-
             let periodStartDayIndex = 0;
-            let periodEndDayIndex = actualDaysInMonth -1;
-
-            let reportTitleKey = "";
-            let reportTitleParams = {};
-            let periodTypeForFooter = translate('reportPeriodFullMonth');
-
-            switch (calcType) {
-                case 'fullMonth':
-                    currentPeriodCarriedOverBalance = Number(currentMonthData.carriedOverBalance) || 0;
-                    currentPeriodPrevBalPaymentsTotal = (Array.isArray(currentMonthData.previousBalancePayments))
-                        ? currentMonthData.previousBalancePayments.reduce((sum, p) => {
-                            if (!p.date) return sum + (Number(p.amount) || 0);
-                            const d = new Date(p.date);
-                            if (d.getFullYear() === year && d.getMonth() === (monthNum - 1)) {
-                                return sum + (Number(p.amount) || 0);
-                            }
-                            return sum;
-                          }, 0)
-                        : 0;
-                    reportTitleKey = 'reportTitleFull';
-                    reportTitleParams = { days: actualDaysInMonth, month: monthNameForTitle, year };
-                    periodTypeForFooter = translate('reportPeriodFullMonth');
-                    break;
-                case 'firstHalfCurrent':
-                    periodEndDayIndex = Math.min(14, actualDaysInMonth - 1);
-                    currentPeriodCarriedOverBalance = Number(currentMonthData.carriedOverBalance) || 0;
-                    currentPeriodPrevBalPaymentsTotal = (Array.isArray(currentMonthData.previousBalancePayments))
-                        ? currentMonthData.previousBalancePayments.reduce((sum, p) => {
-                            if (!p.date) return sum + (Number(p.amount) || 0);
-                            const d = new Date(p.date);
-                            if (d.getFullYear() === year && d.getMonth() === (monthNum - 1)) {
-                                return sum + (Number(p.amount) || 0);
-                            }
-                            return sum;
-                          }, 0)
-                        : 0;
-                    finalBalanceContextKey = 'finalBalanceDueFullMonthContext';
+            let periodEndDayIndexExclusive = 31;
+            let reportTitleKey = 'reportTitleFull';
+            
+            const [year, monthNum] = monthKey.split('-').map(Number);
+            const monthNameForTitle = new Intl.DateTimeFormat(currentLanguage === 'hi' ? 'hi-IN' : 'en-US', { month: 'long' }).format(new Date(year, monthNum - 1, 1));
+            
+            if (calculationMode === 'fullMonth') {
+                currentPeriodCarriedOverBalance = Number(currentMonthData.carriedOverBalance) || 0;
+                currentPeriodPrevBalPaymentsTotal = (currentMonthData.previousBalancePayments || []).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+            } else { 
+                if (periodPart === '1') {
+                    periodEndDayIndexExclusive = 15;
                     reportTitleKey = 'reportTitleFirstHalf';
-                    reportTitleParams = { days: (periodEndDayIndex - periodStartDayIndex + 1 > 0 ? periodEndDayIndex - periodStartDayIndex + 1 : 0) , month: monthNameForTitle, year };
-                    periodTypeForFooter = translate('reportPeriodFirstHalfInfo');
-                    break;
-                case 'afterFifteenthCurrent':
-                    periodStartDayIndex = Math.min(15, actualDaysInMonth -1);
-                     if (periodStartDayIndex > periodEndDayIndex && actualDaysInMonth > 0) {
-                        monthlySummary.innerHTML = `<p>Invalid period for this month length.</p>`; return;
-                    }
                     currentPeriodCarriedOverBalance = Number(currentMonthData.carriedOverBalance) || 0;
-                    currentPeriodPrevBalPaymentsTotal = (Array.isArray(currentMonthData.previousBalancePayments))
-                        ? currentMonthData.previousBalancePayments.reduce((sum, p) => {
-                            if (!p.date) return sum + (Number(p.amount) || 0);
-                            const d = new Date(p.date);
-                            if (d.getFullYear() === year && d.getMonth() === (monthNum - 1)) {
-                                return sum + (Number(p.amount) || 0);
-                            }
-                            return sum;
-                          }, 0)
-                        : 0;
-                    finalBalanceContextKey = 'finalBalanceDueFullMonthContext';
-                    reportTitleKey = 'reportTitleAfterFifteenth';
-                     reportTitleParams = { days: (periodEndDayIndex - periodStartDayIndex + 1 > 0 ? periodEndDayIndex - periodStartDayIndex + 1 : 0), month: monthNameForTitle, year };
-                    periodTypeForFooter = translate('reportPeriodAfter15thInfo');
-                    break;
-                case 'firstHalfIndependent':
-                    periodEndDayIndex = Math.min(14, actualDaysInMonth - 1);
-                    currentPeriodCarriedOverBalance = Number(currentMonthData.carriedOverBalance) || 0;
-                    currentPeriodPrevBalPaymentsTotal = (Array.isArray(currentMonthData.previousBalancePayments))
-                        ? currentMonthData.previousBalancePayments.filter(p => {
-                            if (!p.date) return true;
-                            const d = new Date(p.date);
-                            return d.getFullYear() === year && d.getMonth() === (monthNum - 1) && d.getDate() >= 1 && d.getDate() <= 15;
-                        }).reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
-                        : 0;
-                    reportTitleKey = 'reportTitleFirstHalf';
-                     reportTitleParams = { days: (periodEndDayIndex - periodStartDayIndex + 1 > 0 ? periodEndDayIndex - periodStartDayIndex + 1 : 0), month: monthNameForTitle, year };
-                    periodTypeForFooter = translate('reportPeriodFirstHalfIndie');
-                    break;
-                case 'afterFifteenthIndependent':
-                    periodStartDayIndex = Math.min(15, actualDaysInMonth-1);
-                     if (periodStartDayIndex > periodEndDayIndex && actualDaysInMonth > 0) {
-                        monthlySummary.innerHTML = `<p>Invalid period for this month length.</p>`; return;
-                    }
-                    const firstHalfTotalsIndie = calculatePeriodTotals(currentUser, currentMonthKey, 0, Math.min(15, actualDaysInMonth)); // exclusive end
-                    const prevMonthActualCarriedIndie = Number(currentMonthData.carriedOverBalance) || 0;
-                    const firstHalfPrevBalPaymentsIndie = (Array.isArray(currentMonthData.previousBalancePayments))
-                        ? currentMonthData.previousBalancePayments.filter(p => {
-                            if (!p.date) return true;
-                            const d = new Date(p.date);
-                            return d.getFullYear() === year && d.getMonth() === (monthNum - 1) && d.getDate() >= 1 && d.getDate() <= 15;
-                        }).reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
-                        : 0;
-                    currentPeriodCarriedOverBalance = (firstHalfTotalsIndie.periodGross + prevMonthActualCarriedIndie) - firstHalfTotalsIndie.totalDailyReceived - firstHalfPrevBalPaymentsIndie;
+                    currentPeriodPrevBalPaymentsTotal = (currentMonthData.previousBalancePayments || [])
+                        .filter(p => new Date(p.date).getDate() <= 15)
+                        .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+                } else { 
+                    periodStartDayIndex = 15;
+                    reportTitleKey = 'reportTitleSecondHalf';
                     carriedOverBalanceContextKey = 'carriedOverBalanceFromPrevPeriod';
-                    currentPeriodPrevBalPaymentsTotal = (Array.isArray(currentMonthData.previousBalancePayments))
-                        ? currentMonthData.previousBalancePayments.filter(p => {
-                            if (!p.date) return false;
-                            const d = new Date(p.date);
-                            return d.getFullYear() === year && d.getMonth() === (monthNum - 1) && d.getDate() > 15;
-                        }).reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
-                        : 0;
-                    reportTitleKey = 'reportTitleAfterFifteenth';
-                     reportTitleParams = { days: (periodEndDayIndex - periodStartDayIndex + 1 > 0 ? periodEndDayIndex - periodStartDayIndex + 1 : 0), month: monthNameForTitle, year };
-                    periodTypeForFooter = translate('reportPeriodAfter15thIndie');
-                    break;
-                default: return;
+
+                    const firstHalfTotals = calculatePeriodTotals(currentUser, monthKey, 0, 15);
+                    const prevMonthActualCarried = Number(currentMonthData.carriedOverBalance) || 0;
+                    const firstHalfPayments = (currentMonthData.previousBalancePayments || [])
+                        .filter(p => new Date(p.date).getDate() <= 15)
+                        .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+                    currentPeriodCarriedOverBalance = (firstHalfTotals.periodGross + prevMonthActualCarried) - firstHalfTotals.totalDailyReceived - firstHalfPayments;
+
+                    currentPeriodPrevBalPaymentsTotal = (currentMonthData.previousBalancePayments || [])
+                        .filter(p => new Date(p.date).getDate() > 15)
+                        .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+                }
             }
-
-            // Ensure periodStartDayIndex is not greater than periodEndDayIndex for calculations if month is too short
-            const actualPeriodStartForCalc = (periodStartDayIndex > periodEndDayIndex && actualDaysInMonth > 0) ? periodEndDayIndex + 1 : periodStartDayIndex;
-            const currentUserPeriodTotals = calculatePeriodTotals(currentUser, currentMonthKey, actualPeriodStartForCalc, periodEndDayIndex +1);
+            
+            const currentUserPeriodTotals = calculatePeriodTotals(currentUser, monthKey, periodStartDayIndex, periodEndDayIndexExclusive);
             const { totalPresent: p, totalOvertimeHours: ot, totalRent: r, totalFood: f, totalDailyReceived: rec, periodGross } = currentUserPeriodTotals;
-
+            
             const currentUserRate = Number(userData.rate) || 0;
             const currentUserOvertimeRate = Number(userData.overtimeRate) || 8;
             const currentUserHazriTotal = p * currentUserRate;
             const currentUserOtAmount = (currentUserRate > 0 && currentUserOvertimeRate > 0) ? (ot * currentUserRate) / currentUserOvertimeRate : 0;
-
-            if (finalBalanceContextKey === 'finalBalanceDueFullMonthContext') {
-                const fullMonthTotalsForBalance = calculateFullMonthTotals(currentUser, currentMonthKey);
-                 const fullMonthPrevBalPaymentsForBalance = (Array.isArray(currentMonthData.previousBalancePayments))
-                    ? currentMonthData.previousBalancePayments.reduce((sum, payment) => {
-                        if (!payment.date) return sum + (Number(payment.amount) || 0);
-                        const dPay = new Date(payment.date);
-                        if (dPay.getFullYear() === year && dPay.getMonth() === (monthNum-1)) {
-                            return sum + (Number(payment.amount) || 0);
-                        }
-                        return sum;
-                    }, 0) : 0;
-                const actualMonthCarriedOver = Number(currentMonthData.carriedOverBalance) || 0;
-                finalBalanceForReport = (fullMonthTotalsForBalance.grossTotal + actualMonthCarriedOver) - fullMonthTotalsForBalance.totalDailyReceived - fullMonthPrevBalPaymentsForBalance;
-            } else {
-                finalBalanceForReport = (periodGross + currentPeriodCarriedOverBalance) - rec - currentPeriodPrevBalPaymentsTotal;
-            }
-
-            let summaryHtml = `<h3>${translate('reportFor',{user:currentUser,title:translate(reportTitleKey, reportTitleParams)})}</h3>
+            
+            finalBalanceForReport = (periodGross + currentPeriodCarriedOverBalance) - rec - currentPeriodPrevBalPaymentsTotal;
+            
+            let summaryHtml = `<h3>${translate('reportFor',{user:currentUser,title:translate(reportTitleKey, {year, month: monthNameForTitle})})}</h3>
                 <p>${translate('attendanceSummary',{days:p.toFixed(2),rate:currentUserRate.toFixed(2),total:currentUserHazriTotal.toFixed(2)})}</p>
-                <p>${translate('overtimeSummary',{hours:ot.toFixed(1),amount:currentUserOtAmount.toFixed(2),hoursPerDay:currentUserOvertimeRate})}</p>
+                <p>${translate('overtimeSummary',{hours:ot.toFixed(2),amount:currentUserOtAmount.toFixed(2),hoursPerDay:currentUserOvertimeRate})}</p>
                 <p>${translate('rentSummary',{amount:r.toFixed(2)})}</p><p>${translate('foodSummary',{amount:f.toFixed(2)})}</p>
                 <p><strong>${translate('currentPeriodGross',{amount:periodGross.toFixed(2)})}</strong></p>
                 <p><strong>${translate(carriedOverBalanceContextKey,{amount:currentPeriodCarriedOverBalance.toFixed(2)})}</strong></p>
@@ -2273,87 +2182,10 @@
                 <p>${translate('totalReceivedPrevBalance',{amount:currentPeriodPrevBalPaymentsTotal.toFixed(2)})} ${currentPeriodPrevBalPaymentsTotal===0?`(${translate('noPaymentsRecorded')})`:''}</p>
                 <p><strong>${translate('totalAllReceived',{amount:(rec + currentPeriodPrevBalPaymentsTotal).toFixed(2)})}</strong></p><hr>`;
 
-            combinedFinalBalanceForReport = finalBalanceForReport;
-            otherUserFinalBalanceForReport = 0;
-
-            if (selectedOtherUser && data[selectedOtherUser] && data[selectedOtherUser].isActive !== false) {
-                const otherUserData = data[selectedOtherUser];
-                const otherUserMonthData = otherUserData?.months?.[currentMonthKey];
-                let otherUserFinalBalanceCalc = 0;
-                if (otherUserMonthData) {
-                    let ouPeriodCarried = 0;
-                    let ouPeriodPrevBalPay = 0;
-                    const ouPeriodTotals = calculatePeriodTotals(selectedOtherUser, currentMonthKey, actualPeriodStartForCalc, periodEndDayIndex +1);
-                    if (calcType === 'fullMonth' || calcType === 'firstHalfIndependent' || calcType === 'firstHalfCurrent') {
-                        ouPeriodCarried = Number(otherUserMonthData.carriedOverBalance) || 0;
-                        ouPeriodPrevBalPay = (Array.isArray(otherUserMonthData.previousBalancePayments))
-                            ? otherUserMonthData.previousBalancePayments.filter(p => {
-                                if (!p.date) return (calcType === 'fullMonth' || calcType === 'firstHalfIndependent');
-                                const d = new Date(p.date);
-                                if (d.getFullYear() !== year || d.getMonth() !== (monthNum - 1)) return false;
-                                if (calcType === 'fullMonth' || calcType.includes('Current')) return true;
-                                return d.getDate() >= 1 && d.getDate() <= 15;
-                            }).reduce((sum, p) => sum + (Number(p.amount) || 0), 0) : 0;
-                    } else if (calcType === 'afterFifteenthIndependent' || calcType === 'afterFifteenthCurrent'){
-                        const ouFirstHTotals = calculatePeriodTotals(selectedOtherUser, currentMonthKey, 0, Math.min(15, actualDaysInMonth));
-                        const ouPrevMActualCarried = Number(otherUserMonthData.carriedOverBalance) || 0;
-                        const ouFirstHPrevBalP = (Array.isArray(otherUserMonthData.previousBalancePayments))
-                            ? otherUserMonthData.previousBalancePayments.filter(p => {
-                                if (!p.date) return true;
-                                const d = new Date(p.date);
-                                return d.getFullYear() === year && d.getMonth() === (monthNum - 1) && d.getDate() >= 1 && d.getDate() <= 15;
-                            }).reduce((sum, p) => sum + (Number(p.amount) || 0), 0) : 0;
-                        if (calcType === 'afterFifteenthIndependent') {
-                            ouPeriodCarried = (ouFirstHTotals.periodGross + ouPrevMActualCarried) - ouFirstHTotals.totalDailyReceived - ouFirstHPrevBalP;
-                        } else {
-                            ouPeriodCarried = ouPrevMActualCarried;
-                        }
-                        ouPeriodPrevBalPay = (Array.isArray(otherUserMonthData.previousBalancePayments))
-                            ? otherUserMonthData.previousBalancePayments.filter(p => {
-                                if (!p.date) return false;
-                                const d = new Date(p.date);
-                                if (d.getFullYear() !== year || d.getMonth() !== (monthNum - 1)) return false;
-                                if (calcType.includes('Current')) return true;
-                                return d.getDate() > 15;
-                            }).reduce((sum, p) => sum + (Number(p.amount) || 0), 0) : 0;
-                         if(calcType.includes('Current')){
-                              ouPeriodPrevBalPay = (Array.isArray(otherUserMonthData.previousBalancePayments))
-                                ? otherUserMonthData.previousBalancePayments.reduce((sum, p) => {
-                                    if(!p.date) return sum + (Number(p.amount) || 0);
-                                    const dPay = new Date(p.date);
-                                    if(dPay.getFullYear() === year && dPay.getMonth() === (monthNum-1)) return sum + (Number(p.amount) || 0);
-                                    return sum;
-                                },0) :0;
-                         }
-                    }
-                    if (finalBalanceContextKey === 'finalBalanceDueFullMonthContext') {
-                        const ouFullMonthT = calculateFullMonthTotals(selectedOtherUser, currentMonthKey);
-                        const ouActualMonthC = Number(otherUserMonthData.carriedOverBalance) || 0;
-                        const ouFullMonthPBP = (Array.isArray(otherUserMonthData.previousBalancePayments)) ? otherUserMonthData.previousBalancePayments.reduce((s,p)=>{
-                             if(!p.date) return s + (Number(p.amount) || 0);
-                             const dPay = new Date(p.date);
-                             if(dPay.getFullYear() === year && dPay.getMonth() === (monthNum-1)) return s + (Number(p.amount) || 0);
-                             return s;
-                        },0) :0;
-                        otherUserFinalBalanceCalc = (ouFullMonthT.grossTotal + ouActualMonthC) - ouFullMonthT.totalDailyReceived - ouFullMonthPBP;
-                    } else {
-                        otherUserFinalBalanceCalc = (ouPeriodTotals.periodGross + ouPeriodCarried) - ouPeriodTotals.totalDailyReceived - ouPeriodPrevBalPay;
-                    }
-                    otherUserFinalBalanceForReport = otherUserFinalBalanceCalc;
-                }
-                summaryHtml += `<hr><h4>${translate('includeBalanceOf')} ${selectedOtherUser} (${translate('forUser', {user: ""})})</h4>
-                                <p><strong>${translate('otherUserFinalBalance', {otherUser: selectedOtherUser, amount: otherUserFinalBalanceForReport.toFixed(2)})}</strong></p>`;
-                combinedFinalBalanceForReport = parseFloat((finalBalanceForReport + otherUserFinalBalanceForReport).toFixed(2));
-                summaryHtml += `<hr><p><strong>${translate('combinedFinalBalance', {currentUser: currentUser, otherUser: selectedOtherUser, amount: combinedFinalBalanceForReport.toFixed(2)})}</strong></p>`;
-            } else {
-                summaryHtml += `<p><strong>${translate(finalBalanceContextKey,{amount:finalBalanceForReport.toFixed(2)})}</strong></p>`;
-            }
-
+            summaryHtml += `<p><strong>${translate('finalBalanceDueForPeriod',{amount:finalBalanceForReport.toFixed(2)})}</strong></p>`;
+            
             monthlySummary.innerHTML = summaryHtml;
-            document.getElementById('reportFooter').dataset.periodTypeForShare = periodTypeForFooter;
-            updateTableFooter(currentMonthKey);
         }
-
 
         async function shareReport() {
              const reportArea = document.getElementById('reportArea');
@@ -2363,7 +2195,7 @@
             if (monthlySummaryDiv.style.display !== 'block' || monthlySummaryDiv.innerText.trim()==="" || monthlySummaryDiv.innerText.includes(translate('alertSelectUserMonth')) || !tableContainer || tableContainer.innerHTML.trim() === "") {
                  alert(translate('alertGenerateReportFirst')); return;
             }
-            if (!currentUser || !currentlyViewedMonth || !data[currentUser]?.months?.[currentlyViewedMonth]) {
+            if (!currentUser || !currentlyViewedPeriod || !data[currentUser]?.months?.[currentlyViewedPeriod.split('_')[0]]) {
                  alert(translate('alertCannotGenerateImage')); return;
             }
 
@@ -2378,12 +2210,7 @@
             document.querySelectorAll('#userQuickControls label').forEach(label => elementsToHide.push(label));
 
             const mainTableFooter = document.getElementById('attendanceTableFooter');
-            let mainFooterOriginalDisplay = '';
-            if (mainTableFooter && activeReportType !== 'fullMonth') {
-                mainFooterOriginalDisplay = mainTableFooter.style.display;
-                mainTableFooter.style.display = 'none';
-            }
-
+            
             const originalDisplays = elementsToHide.map(el => el.style.display);
             elementsToHide.forEach(el => { el.style.display = 'none'; });
 
@@ -2396,7 +2223,7 @@
                     if (['overtime', 'rent', 'food', 'received'].includes(field)) {
                         const num = parseFloat(displayValue);
                         if (isNaN(num) || num === 0) displayValue = '';
-                        else { let precision = (field === 'overtime') ? 1 : 2; displayValue = String(Number(num.toFixed(precision))); if (displayValue === "0") displayValue = ""; }
+                        else { let precision = (field === 'overtime') ? 2 : 2; displayValue = String(Number(num.toFixed(precision))); if (displayValue === "0") displayValue = ""; }
                     } else if (field === 'status') displayValue = displayValue.trim().toUpperCase();
                     else if (field === 'updated_date' || field === 'updated_time') {
                         if (td.classList.contains('edited-datetime-cell')) { span.style.display = 'block'; span.style.textAlign = 'center'; span.style.fontSize = '0.80em';}
@@ -2418,27 +2245,21 @@
 
             await new Promise(r => setTimeout(r, 50));
             const footerDiv = document.getElementById('reportFooter');
-            const periodTypeForShare = footerDiv.dataset.periodTypeForShare || translate('reportPeriodFullMonth');
+            
+            const [monthKey, periodPart] = currentlyViewedPeriod.split('_');
+            const [year, monthNum] = monthKey.split('-').map(Number);
+            const monthName = new Intl.DateTimeFormat(currentLanguage === 'hi' ? 'hi-IN' : 'en-US', { month: 'long' }).format(new Date(year, monthNum - 1, 1));
+            let periodTitle = `${monthName} ${year}`;
+            if (calculationMode === 'halfMonth') {
+                periodTitle += ` (${periodPart === '1' ? '1-15' : '16-End'})`;
+            }
 
             if(footerDiv){
                 const now = new Date();
                 const formatter = new Intl.DateTimeFormat(currentLanguage==='hi'?'hi-IN-u-nu-latn':'en-GB', {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
-                let otherUserBalanceStringForFooter = "";
-                let finalBalanceToDisplayInFooter = finalBalanceForReport;
-                const otherUserSelect = document.getElementById('otherUserForReport');
-                const selectedOtherUserForShare = otherUserSelect ? otherUserSelect.value : '';
-                if (selectedOtherUserForShare && data[selectedOtherUserForShare] && data[selectedOtherUserForShare].isActive !== false && data[selectedOtherUserForShare]?.months?.[currentlyViewedMonth]) {
-                     if (otherUserFinalBalanceForReport !== 0 || finalBalanceForReport !== 0) {
-                         otherUserBalanceStringForFooter = translate('footerIncludeOtherUserFinalBalance', {
-                             otherUser: selectedOtherUserForShare, otherUserFinalBalance: otherUserFinalBalanceForReport.toFixed(2),
-                             combinedBalance: combinedFinalBalanceForReport.toFixed(2)
-                         });
-                         finalBalanceToDisplayInFooter = combinedFinalBalanceForReport;
-                     }
-                }
-                 footerDiv.textContent = translate('reportGeneratedOn',{
-                     user:currentUser, monthYear:currentlyViewedMonth, periodType: periodTypeForShare,
-                     balance:finalBalanceToDisplayInFooter.toFixed(2), dateTime:formatter.format(now), otherUserBalanceString: otherUserBalanceStringForFooter
+                footerDiv.textContent = translate('reportGeneratedOn',{
+                     user:currentUser, periodTitle: periodTitle,
+                     balance:finalBalanceForReport.toFixed(2), dateTime:formatter.format(now), otherUserBalanceString: ""
                  });
                  await new Promise(r => setTimeout(r, 50));
             }
@@ -2451,40 +2272,20 @@
                      }
                      if(parentTd) parentTd.style.verticalAlign = '';
                 });
-                if (mainTableFooter && activeReportType !== 'fullMonth') {
-                    mainTableFooter.style.display = mainFooterOriginalDisplay;
-                }
             };
 
             try {
                 const canvas = await html2canvas(reportArea, {
                     scale: 2, logging: false, useCORS: true,
                     backgroundColor: document.documentElement.classList.contains('dark') ? '#2d3748' : '#ffffff',
-                    ignoreElements: el => el.classList.contains('delete-payment-btn') || el.id === 'dataManagementButtons' ||
-                               el.id === 'userTabs' || el.id === 'controlsHeader' || el.classList.contains('control-icon') ||
-                               el.closest('#topControls') !== null || el.id === 'overallSummarySection' ||
-                               (el.id === 'attendanceTableFooter' && activeReportType !== 'fullMonth')
                 });
                 if(!canvas) throw new Error("Canvas creation failed.");
                 canvas.toBlob(async blob => {
                     restoreElements(); if(!blob){ alert(translate('alertCouldNotGenerateImage')); return; }
-                    const file = new File([blob], `attendance_report_${currentUser}_${currentlyViewedMonth}_${activeReportType}.png`, {type:'image/png'});
-                    const [yrF, mthF] = currentlyViewedMonth.split('-').map(Number);
-                    const shareTitle = translate('reportFor', { user: currentUser,
-                        title: `${new Intl.DateTimeFormat(currentLanguage==='hi'?'hi-IN':'en-US',{month:'long',year:'numeric'}).format(new Date(yrF,mthF-1,1))}${periodTypeForShare}`
-                    });
-                    let shareBalanceAmountText = "";
-                    const otherUserSelectForShare = document.getElementById('otherUserForReport');
-                    const selectedOtherUserForShareText = otherUserSelectForShare ? otherUserSelectForShare.value : '';
-                    if (selectedOtherUserForShareText && data[selectedOtherUserForShareText] && data[selectedOtherUserForShareText].isActive !== false && data[selectedOtherUserForShareText]?.months?.[currentlyViewedMonth]) {
-                         shareBalanceAmountText = translate('combinedFinalBalance', {currentUser: currentUser, otherUser: selectedOtherUserForShareText, amount: combinedFinalBalanceForReport.toFixed(2)});
-                    } else {
-                        const finalBalanceKey = (activeReportType.includes('Current'))
-                            ? 'finalBalanceDueFullMonthContext'
-                            : 'finalBalanceDueForPeriod';
-                         shareBalanceAmountText = translate(finalBalanceKey, {amount: finalBalanceForReport.toFixed(2)});
-                    }
-                    const shareText = `${shareTitle}\n${shareBalanceAmountText}`;
+                    const file = new File([blob], `attendance_report_${currentUser}_${currentlyViewedPeriod}.png`, {type:'image/png'});
+                    const shareTitle = translate('reportFor', { user: currentUser, title: periodTitle });
+                    const shareText = `${shareTitle}\n${translate('finalBalanceDueForPeriod', {amount: finalBalanceForReport.toFixed(2)})}`;
+
                     if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
                         try {
                             await navigator.share({ files: [file], title: shareTitle, text: shareText });
@@ -2502,9 +2303,17 @@
             a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
         }
 
-        function getCurrentMonth() {
-            const d = new Date();
-            return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, "0")}`;
+        function getCurrentPeriod() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            if (calculationMode === 'fullMonth') {
+                return `${year}-${month}`;
+            } else {
+                const day = today.getDate();
+                const periodPart = day <= 15 ? '1' : '2';
+                return `${year}-${month}_${periodPart}`;
+            }
         }
 
         function toggleDataMenu() {
@@ -2530,8 +2339,10 @@
             if(confirm(translate('confirmClearData'))){
                 if(renderTimeout) clearTimeout(renderTimeout);
                 localStorage.removeItem('attendanceData'); localStorage.removeItem('lastSelectedUser');
-                localStorage.removeItem('activeReportType'); // Clear stored report type
-                data = {}; currentUser = null; currentlyViewedMonth = null; activeReportType = 'fullMonth'; // Reset to default
+                localStorage.removeItem('calculationMode');
+                data = {}; currentUser = null; currentlyViewedPeriod = null; 
+                calculationMode = 'fullMonth';
+                setModeIcon();
                 finalBalanceForReport = 0; combinedFinalBalanceForReport = 0; otherUserFinalBalanceForReport = 0;
                 importDataBuffer = null; showArchivedUsers = false;
                 fullRender();
@@ -2541,7 +2352,6 @@
                 setDarkMode(localStorage.getItem('darkMode') === 'enabled');
                 currentLanguage = localStorage.getItem('appLanguage') || 'hi';
                 document.documentElement.lang = currentLanguage; applyTranslationsToUI();
-                localStorage.removeItem('attendanceData');
                 alert(translate('alertDataCleared'));
                 const menu = document.getElementById('dataManagementButtons'); if(menu) menu.style.display = 'none';
             }
@@ -2552,11 +2362,11 @@
                  const exportObj = {
                      attendanceData: data,
                      exportDate: new Date().toISOString(),
-                     appVersion: "1.9.1", // Version increment for localStorage of activeReportType
+                     appVersion: "3.2.0",
                      language: currentLanguage,
                      darkMode: localStorage.getItem('darkMode'),
                      showArchivedUsers: showArchivedUsers,
-                     activeReportType: localStorage.getItem('activeReportType') || 'fullMonth' // Also export the persisted report type
+                     calculationMode: calculationMode
                  };
                 downloadBlob(new Blob([JSON.stringify(exportObj,null,2)],{type:'application/json'}),`attendance_data_${new Date().toISOString().slice(0,10)}.json`);
                 alert(translate('alertDataExported'));
@@ -2567,8 +2377,7 @@
         function handleFileUpload(event) {
             const file = event.target.files[0]; if(!file){ alert(translate('alertNoFileSelected')); return; }
             if(file.type !== 'application/json' && !file.name.toLowerCase().endsWith('.json')){
-                alert(translate('alertSelectJsonFile')); event.target.value = ''; return;
-            }
+                alert(translate('alertSelectJsonFile')); event.target.value = ''; return; }
             const reader = new FileReader();
             reader.onload = e => {
                 try {
@@ -2576,35 +2385,13 @@
                     if(!parsedData || typeof parsedData !== 'object' || !parsedData.attendanceData || typeof parsedData.attendanceData !== 'object') {
                         throw new Error(translate('alertInvalidImportFormat'));
                     }
-                    // Try to restore activeReportType from import if available
-                    if (parsedData.activeReportType) {
-                        localStorage.setItem('activeReportType', parsedData.activeReportType);
-                        activeReportType = parsedData.activeReportType; // Update in-memory var too
+                    if (parsedData.calculationMode) {
+                        localStorage.setItem('calculationMode', parsedData.calculationMode);
+                        calculationMode = parsedData.calculationMode;
+                        setModeIcon();
                     }
-
-                    const importedAttendanceData = parsedData.attendanceData; let importMigrationNeeded = false;
-                     for(const userName in importedAttendanceData){
-                         if(importedAttendanceData[userName] && typeof importedAttendanceData[userName] === 'object') {
-                             if(importedAttendanceData[userName].overtimeRate === undefined || typeof importedAttendanceData[userName].overtimeRate !== 'number' || importedAttendanceData[userName].overtimeRate <= 0) {
-                                  importedAttendanceData[userName].overtimeRate = 8; importMigrationNeeded = true;
-                             }
-                             if (importedAttendanceData[userName].months && typeof importedAttendanceData[userName].months === 'object') {
-                                 for (const monthKey in importedAttendanceData[userName].months) {
-                                     if (importedAttendanceData[userName].months[monthKey] && typeof importedAttendanceData[userName].months[monthKey] === 'object') {
-                                         if (Array.isArray(importedAttendanceData[userName].months[monthKey].days)) {
-                                              importedAttendanceData[userName].months[monthKey].days.forEach(d => {
-                                                   if (d && typeof d === 'object' && d.location !== undefined) { delete d.location; importMigrationNeeded = true; }
-                                                   if (d && typeof d === 'object' && d.updated === undefined) { d.updated = ''; importMigrationNeeded = true; }
-                                              });
-                                         }
-                                     }
-                                 }
-                             }
-                              if (importedAttendanceData[userName].isActive === undefined) { importedAttendanceData[userName].isActive = true; importMigrationNeeded = true; }
-                         }
-                     }
-                     if(importMigrationNeeded) console.log("Migration performed on imported data during preview.");
-                    importDataBuffer = importedAttendanceData; showImportPreview(importDataBuffer);
+                    importDataBuffer = parsedData.attendanceData; 
+                    showImportPreview(importDataBuffer);
                 } catch(err) { alert(translate('alertImportProcessingError',{error: err.message}));
                 } finally { event.target.value = ''; }
             };
@@ -2649,60 +2436,30 @@
                 if(mode === 'replace'){
                     data = JSON.parse(JSON.stringify(importDataBuffer));
                     localStorage.removeItem('lastSelectedUser');
-                    // activeReportType would have been set during handleFileUpload if present in import file
                 } else if(mode === 'merge'){
                     for(const name in importDataBuffer){
                         const importedUser = importDataBuffer[name];
                         if (importedUser && typeof importedUser === 'object') {
                             if (data[name]) {
                                 data[name].rate = importedUser.rate ?? data[name].rate;
-                                data[name].overtimeRate = (importedUser.overtimeRate !== undefined && typeof importedUser.overtimeRate === 'number' && importedUser.overtimeRate > 0)
-                                                          ? importedUser.overtimeRate : (data[name].overtimeRate ?? 8);
+                                data[name].overtimeRate = importedUser.overtimeRate ?? data[name].overtimeRate;
                                 data[name].isActive = importedUser.isActive ?? data[name].isActive;
                                 data[name].months = data[name].months || {};
                                 if (importedUser.months && typeof importedUser.months === 'object') {
                                     for(const mKey in importedUser.months){
-                                        const importedMonthData = importedUser.months[mKey];
-                                        if (importedMonthData && typeof importedMonthData === 'object') {
-                                            data[name].months[mKey] = JSON.parse(JSON.stringify(importedMonthData));
-                                            if(typeof data[name].months[mKey].carriedOverBalance !== 'number') data[name].months[mKey].carriedOverBalance = 0;
-                                            if(!Array.isArray(data[name].months[mKey].previousBalancePayments)) data[name].months[mKey].previousBalancePayments = [];
-                                            if(!Array.isArray(data[name].months[mKey].days)) data[name].months[mKey].days = [];
-                                            if (data[name].months[mKey].days) {
-                                                 data[name].months[mKey].days.forEach(d => {
-                                                      if (d && typeof d === 'object' && d.location !== undefined) delete d.location;
-                                                      if (d && typeof d === 'object' && d.updated === undefined) d.updated = '';
-                                                 });
-                                            }
+                                        if(importedUser.months[mKey]) {
+                                            data[name].months[mKey] = JSON.parse(JSON.stringify(importedUser.months[mKey]));
                                         }
                                     }
                                 }
                             } else {
                                 data[name] = JSON.parse(JSON.stringify(importedUser));
-                                if (data[name].isActive === undefined) data[name].isActive = true;
-                                if(data[name].overtimeRate === undefined || typeof data[name].overtimeRate !== 'number' || data[name].overtimeRate <= 0) data[name].overtimeRate = 8;
-                                data[name].months = data[name].months || {};
-                                if (data[name].months) {
-                                     for (const mKey in data[name].months) {
-                                          if (data[name].months[mKey] && typeof data[name].months[mKey] === 'object') {
-                                              if (typeof data[name].months[mKey].carriedOverBalance !== 'number') data[name].months[mKey].carriedOverBalance = 0;
-                                              if (!Array.isArray(data[name].months[mKey].previousBalancePayments)) data[name].months[mKey].previousBalancePayments = [];
-                                              if (!Array.isArray(data[name].months[mKey].days)) data[name].months[mKey].days = [];
-                                                if (data[name].months[mKey].days) {
-                                                     data[name].months[mKey].days.forEach(d => {
-                                                          if (d && typeof d === 'object' && d.location !== undefined) delete d.location;
-                                                          if (d && typeof d === 'object' && d.updated === undefined) d.updated = '';
-                                                     });
-                                                }
-                                          }
-                                     }
-                                }
                             }
                         }
                     }
                 }
                 saveData();
-                loadData(); // This will also load the activeReportType from localStorage
+                loadData();
                 closeImportModal();
                 alert(translate('alertDataImported',{mode: mode==='replace' ? translate('replaceAllData') : translate('mergeData')}));
             } catch(e){ alert(translate('alertImportFailed',{error: e.message})); closeImportModal();
@@ -2770,16 +2527,13 @@
                     dateInputElement.value = new Date(dayData.updated).toLocaleDateString(currentLanguage === 'hi' ? 'hi-IN-u-hc-h12' : 'en-GB', {day: '2-digit', month: '2-digit', year: 'numeric'}).replace(/\//g, '-');
                     timeInputElement.value = new Date(dayData.updated).toLocaleTimeString(currentLanguage === 'hi' ? 'hi-IN-u-hc-h12' : 'en-GB', {hour: '2-digit', minute: '2-digit', hourCycle: 'h23'});
                 }
-                if (document.getElementById('summarySection').style.display === 'block') showSummary(activeReportType);
-                if (document.getElementById('overallSummarySection').style.display === 'block') displayOverallReport();
+                scheduleSummaryUpdate();
             }
             closeNotesModal();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            loadData(); // activeReportType is loaded from localStorage here
-             const overallReportBtn = document.getElementById('viewOverallReportBtn');
-             if(overallReportBtn) overallReportBtn.addEventListener('click', displayOverallReport);
+            loadData();
              const paymentDateInput = document.getElementById('paymentDate');
              if (paymentDateInput) {
                 paymentDateInput.valueAsDate = new Date();
@@ -2794,4 +2548,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
