@@ -2101,42 +2101,33 @@
                  return;
             }
             
-            let currentPeriodCarriedOverBalance = 0;
-            let currentPeriodPrevBalPaymentsTotal = 0;
+            const currentPeriodCarriedOverBalance = Number(currentMonthData.carriedOverBalance) || 0;
             let carriedOverBalanceContextKey = 'carriedOverBalanceFromPrevMonth';
+            
             let periodStartDayIndex = 0;
             let periodEndDayIndexExclusive = 31;
             let reportTitleKey = 'reportTitleFull';
-            
-            const [year, monthNum] = monthKey.split('-').map(Number);
-            const monthNameForTitle = new Intl.DateTimeFormat(currentLanguage === 'hi' ? 'hi-IN' : 'en-US', { month: 'long' }).format(new Date(year, monthNum - 1, 1));
-            
-            if (calculationMode === 'fullMonth') {
-                currentPeriodCarriedOverBalance = Number(currentMonthData.carriedOverBalance) || 0;
-                currentPeriodPrevBalPaymentsTotal = (currentMonthData.previousBalancePayments || []).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-            } else { 
+            let currentPeriodPrevBalPaymentsTotal = (currentMonthData.previousBalancePayments || []).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+
+            if (calculationMode === 'halfMonth') {
                 if (periodPart === '1') {
                     periodEndDayIndexExclusive = 15;
                     reportTitleKey = 'reportTitleFirstHalf';
-                    currentPeriodCarriedOverBalance = Number(currentMonthData.carriedOverBalance) || 0;
                     currentPeriodPrevBalPaymentsTotal = (currentMonthData.previousBalancePayments || [])
                         .filter(p => new Date(p.date).getDate() <= 15)
                         .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-                } else { 
+                } else { // periodPart === '2'
                     periodStartDayIndex = 15;
                     reportTitleKey = 'reportTitleSecondHalf';
-                    carriedOverBalanceContextKey = 'carriedOverBalanceFromPrevPeriod';
-                    const firstHalfTotals = calculatePeriodTotals(currentUser, monthKey, 0, 15);
-                    const prevMonthActualCarried = Number(currentMonthData.carriedOverBalance) || 0;
-                    const firstHalfPayments = (currentMonthData.previousBalancePayments || [])
-                        .filter(p => new Date(p.date).getDate() <= 15)
-                        .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-                    currentPeriodCarriedOverBalance = (firstHalfTotals.periodGross + prevMonthActualCarried) - firstHalfTotals.totalDailyReceived - firstHalfPayments;
+                    carriedOverBalanceContextKey = 'carriedOverBalanceFromPrevPeriod'; 
                     currentPeriodPrevBalPaymentsTotal = (currentMonthData.previousBalancePayments || [])
                         .filter(p => new Date(p.date).getDate() > 15)
                         .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
                 }
             }
+            
+            const [year, monthNum] = monthKey.split('-').map(Number);
+            const monthNameForTitle = new Intl.DateTimeFormat(currentLanguage === 'hi' ? 'hi-IN' : 'en-US', { month: 'long' }).format(new Date(year, monthNum - 1, 1));
             
             const currentUserPeriodTotals = calculatePeriodTotals(currentUser, monthKey, periodStartDayIndex, periodEndDayIndexExclusive);
             const { totalPresent: p, totalOvertimeHours: ot, totalRent: r, totalFood: f, totalDailyReceived: rec, periodGross } = currentUserPeriodTotals;
@@ -2167,32 +2158,17 @@
             if (selectedOtherUserName && data[selectedOtherUserName]) {
                 const otherUserData = data[selectedOtherUserName];
                 const otherUserMonthData = otherUserData.months?.[monthKey];
-                
-                let otherUserCarried = 0;
-                let otherUserPayments = 0;
-                
+                const otherUserCarried = Number(otherUserMonthData?.carriedOverBalance) || 0;
                 const otherUserPeriodTotals = calculatePeriodTotals(selectedOtherUserName, monthKey, periodStartDayIndex, periodEndDayIndexExclusive);
-
-                if (calculationMode === 'fullMonth') {
-                    otherUserCarried = Number(otherUserMonthData?.carriedOverBalance) || 0;
-                    otherUserPayments = (otherUserMonthData?.previousBalancePayments || []).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+                let otherUserPayments = 0;
+                if (calculationMode === 'halfMonth' && periodPart === '2') {
+                    otherUserPayments = (otherUserMonthData?.previousBalancePayments || [])
+                        .filter(p => new Date(p.date).getDate() > 15)
+                        .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
                 } else {
-                    if (periodPart === '1') {
-                        otherUserCarried = Number(otherUserMonthData?.carriedOverBalance) || 0;
-                        otherUserPayments = (otherUserMonthData?.previousBalancePayments || [])
-                            .filter(p => new Date(p.date).getDate() <= 15)
-                            .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-                    } else {
-                        const firstHalfTotalsOther = calculatePeriodTotals(selectedOtherUserName, monthKey, 0, 15);
-                        const prevMonthCarriedOther = Number(otherUserMonthData?.carriedOverBalance) || 0;
-                        const firstHalfPaymentsOther = (otherUserMonthData?.previousBalancePayments || [])
-                            .filter(p => new Date(p.date).getDate() <= 15)
-                            .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-                        otherUserCarried = (firstHalfTotalsOther.periodGross + prevMonthCarriedOther) - firstHalfTotalsOther.totalDailyReceived - firstHalfPaymentsOther;
-                        otherUserPayments = (otherUserMonthData?.previousBalancePayments || [])
-                            .filter(p => new Date(p.date).getDate() > 15)
-                            .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-                    }
+                     otherUserPayments = (otherUserMonthData?.previousBalancePayments || [])
+                        .filter(p => new Date(p.date).getDate() <= 15)
+                        .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
                 }
                 
                 otherUserFinalBalanceForReport = (otherUserPeriodTotals.periodGross + otherUserCarried) - otherUserPeriodTotals.totalDailyReceived - otherUserPayments;
@@ -2608,4 +2584,4 @@
         });
     </script>
 </body>
-    </html>
+</html>
