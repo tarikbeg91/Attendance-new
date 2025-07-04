@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1628,40 +1627,6 @@
             if (nextPeriod > getCurrentPeriod()) {
                 alert(translate('cannotGoToFutureMonth'));
                 return;
-            }
-
-            const [currentMonthKey, currentPeriodPart] = currentlyViewedPeriod.split('_');
-            const currentMonthData = data[currentUser].months[currentMonthKey];
-            let balanceToCarry = 0;
-
-            if (calculationMode === 'fullMonth' || (calculationMode === 'halfMonth' && currentPeriodPart === '2')) {
-                const fullMonthTotals = calculatePeriodTotals(currentUser, currentMonthKey, 0, 31);
-                const prevBal = Number(currentMonthData?.carriedOverBalance) || 0;
-                const prevBalPayments = (currentMonthData?.previousBalancePayments || []).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-                balanceToCarry = (fullMonthTotals.periodGross + prevBal) - fullMonthTotals.totalDailyReceived - prevBalPayments;
-            } else if (calculationMode === 'halfMonth' && currentPeriodPart === '1') {
-                const firstHalfTotals = calculatePeriodTotals(currentUser, currentMonthKey, 0, 15);
-                const prevBal = Number(currentMonthData?.carriedOverBalance) || 0;
-                const firstHalfPayments = (currentMonthData?.previousBalancePayments || [])
-                    .filter(p => new Date(p.date).getDate() <= 15)
-                    .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
-                balanceToCarry = (firstHalfTotals.periodGross + prevBal) - firstHalfTotals.totalDailyReceived - firstHalfPayments;
-            }
-
-            if (balanceToCarry !== 0 && (calculationMode === 'fullMonth' || (calculationMode === 'halfMonth' && currentPeriodPart === '2'))) {
-                 const [nextMonthKey, nextPeriodPart] = nextPeriod.split('_');
-                 const [nextY, nextM] = nextMonthKey.split('-').map(Number);
-                 let periodName = new Intl.DateTimeFormat(currentLanguage === 'hi' ? 'hi-IN' : 'en-US', { month: 'long', year: 'numeric' }).format(new Date(nextY, nextM - 1, 1));
-                 if(calculationMode === 'halfMonth') { periodName += ` (1-15)`; }
-
-                if (confirm(translate('confirmCarryOverBalance', { amount: balanceToCarry.toFixed(2), period: periodName }))) {
-                    const nextMonthKeyForData = nextPeriod.split('_')[0];
-                    if (!data[currentUser].months[nextMonthKeyForData]) {
-                        data[currentUser].months[nextMonthKeyForData] = { carriedOverBalance: 0, previousBalancePayments: [], days: [] };
-                    }
-                    data[currentUser].months[nextMonthKeyForData].carriedOverBalance = parseFloat(balanceToCarry.toFixed(2));
-                    saveData();
-                }
             }
             
             currentlyViewedPeriod = nextPeriod;
