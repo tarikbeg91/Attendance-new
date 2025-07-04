@@ -890,7 +890,7 @@
                  overallFinalBalanceDue: "कुल अंतिम बैलेंस देय: {amount}", noDataForOverallReport: "{user} के लिए कुल रिपोर्ट जनरेट करने के लिए कोई डेटा उपलब्ध नहीं है।",
                  includeBalanceOf: "शामिल करें बैलेंस किसका:", otherUserPeriodEarnings: "पीरियड कमाई {otherUser} के लिए: {amount}",
                  otherUserPeriodReceived: "पीरियड प्राप्त (रोजाना) {otherUser} के लिए: {amount}", otherUserPeriodNet: "पीरियड नेट {otherUser} के लिए ({earnings} - {received}): {amount}",
-                 otherUserFinalBalance: "{otherUser} का अंतिम देय बैलेंस: {amount}", combinedFinalBalance: "संयुक्त अंतिम देय बैलेंस ({currentUser} + {otherUser} का अंतिम बैलेंस): {amount}",
+                 otherUserFinalBalance: "Final Balance Due for {otherUser}: {amount}", combinedFinalBalance: "Combined Final Balance Due ({currentUser} + {otherUser}'s Final Balance): {amount}",
                  footerIncludeOtherUserFinalBalance: "\n({otherUser} का अंतिम बैलेंस शामिल है: {otherUserFinalBalance}) \nसंयुक्त बैलेंस: {combinedBalance}",
                  overtimeRateLabel: "ओवरटाइम घंटे प्रति हाज़िरी दर:", otRatePlaceholder: "ओटी दर", selectUserPlaceholder: "-- यूज़र चुनें --",
                  ratePlaceholderShort: "दर", otRatePlaceholderShort: "ओटी", balancePlaceholderShort: "बैलेंस", selectUserPlaceholderShort: "-- यूज़र चुनें --",
@@ -1207,7 +1207,6 @@
              checkReminders();
         }
 
-        // *** THIS IS THE NEWLY ADDED FUNCTION TO FIX THE ERROR ***
         function showSaveStatus(message, statusType = 'success', duration = 3000) {
             const indicator = document.getElementById('saveStatusIndicator');
             if (!indicator) return;
@@ -2100,6 +2099,7 @@
             const otherUserSelect = document.getElementById('otherUserForReport');
             const shareButtonWrapper = document.getElementById('shareReportButtonWrapper');
             const footerDiv = document.getElementById('reportFooter');
+            const selectedOtherUserName = otherUserSelect.value;
 
             overallSummary.style.display = 'none'; overallSummary.innerHTML = '';
             monthlySummary.style.display = 'block';
@@ -2147,14 +2147,12 @@
                     periodStartDayIndex = 15;
                     reportTitleKey = 'reportTitleSecondHalf';
                     carriedOverBalanceContextKey = 'carriedOverBalanceFromPrevPeriod';
-
                     const firstHalfTotals = calculatePeriodTotals(currentUser, monthKey, 0, 15);
                     const prevMonthActualCarried = Number(currentMonthData.carriedOverBalance) || 0;
                     const firstHalfPayments = (currentMonthData.previousBalancePayments || [])
                         .filter(p => new Date(p.date).getDate() <= 15)
                         .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
                     currentPeriodCarriedOverBalance = (firstHalfTotals.periodGross + prevMonthActualCarried) - firstHalfTotals.totalDailyReceived - firstHalfPayments;
-
                     currentPeriodPrevBalPaymentsTotal = (currentMonthData.previousBalancePayments || [])
                         .filter(p => new Date(p.date).getDate() > 15)
                         .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
@@ -2183,7 +2181,49 @@
                 <p><strong>${translate('totalAllReceived',{amount:(rec + currentPeriodPrevBalPaymentsTotal).toFixed(2)})}</strong></p><hr>`;
 
             summaryHtml += `<p><strong>${translate('finalBalanceDueForPeriod',{amount:finalBalanceForReport.toFixed(2)})}</strong></p>`;
-            
+
+            otherUserFinalBalanceForReport = 0;
+            combinedFinalBalanceForReport = finalBalanceForReport;
+
+            if (selectedOtherUserName && data[selectedOtherUserName]) {
+                const otherUserData = data[selectedOtherUserName];
+                const otherUserMonthData = otherUserData.months?.[monthKey];
+                
+                let otherUserCarried = 0;
+                let otherUserPayments = 0;
+                
+                const otherUserPeriodTotals = calculatePeriodTotals(selectedOtherUserName, monthKey, periodStartDayIndex, periodEndDayIndexExclusive);
+
+                if (calculationMode === 'fullMonth') {
+                    otherUserCarried = Number(otherUserMonthData?.carriedOverBalance) || 0;
+                    otherUserPayments = (otherUserMonthData?.previousBalancePayments || []).reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+                } else {
+                    if (periodPart === '1') {
+                        otherUserCarried = Number(otherUserMonthData?.carriedOverBalance) || 0;
+                        otherUserPayments = (otherUserMonthData?.previousBalancePayments || [])
+                            .filter(p => new Date(p.date).getDate() <= 15)
+                            .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+                    } else {
+                        const firstHalfTotalsOther = calculatePeriodTotals(selectedOtherUserName, monthKey, 0, 15);
+                        const prevMonthCarriedOther = Number(otherUserMonthData?.carriedOverBalance) || 0;
+                        const firstHalfPaymentsOther = (otherUserMonthData?.previousBalancePayments || [])
+                            .filter(p => new Date(p.date).getDate() <= 15)
+                            .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+                        otherUserCarried = (firstHalfTotalsOther.periodGross + prevMonthCarriedOther) - firstHalfTotalsOther.totalDailyReceived - firstHalfPaymentsOther;
+                        otherUserPayments = (otherUserMonthData?.previousBalancePayments || [])
+                            .filter(p => new Date(p.date).getDate() > 15)
+                            .reduce((sum, p) => sum + (Number(p.amount) || 0), 0);
+                    }
+                }
+                
+                otherUserFinalBalanceForReport = (otherUserPeriodTotals.periodGross + otherUserCarried) - otherUserPeriodTotals.totalDailyReceived - otherUserPayments;
+                combinedFinalBalanceForReport = finalBalanceForReport + otherUserFinalBalanceForReport;
+
+                summaryHtml += `<hr>
+                    <p><strong>${translate('otherUserFinalBalance', { otherUser: selectedOtherUserName, amount: otherUserFinalBalanceForReport.toFixed(2) })}</strong></p>
+                    <p><strong>${translate('combinedFinalBalance', { currentUser: currentUser, otherUser: selectedOtherUserName, amount: combinedFinalBalanceForReport.toFixed(2) })}</strong></p>`;
+            }
+
             monthlySummary.innerHTML = summaryHtml;
         }
 
@@ -2191,6 +2231,8 @@
              const reportArea = document.getElementById('reportArea');
             const monthlySummaryDiv = document.getElementById('summarySection');
             const tableContainer = document.getElementById('tableContainer');
+            const otherUserSelect = document.getElementById('otherUserForReport');
+            const selectedOtherUserName = otherUserSelect.value;
 
             if (monthlySummaryDiv.style.display !== 'block' || monthlySummaryDiv.innerText.trim()==="" || monthlySummaryDiv.innerText.includes(translate('alertSelectUserMonth')) || !tableContainer || tableContainer.innerHTML.trim() === "") {
                  alert(translate('alertGenerateReportFirst')); return;
@@ -2257,9 +2299,23 @@
             if(footerDiv){
                 const now = new Date();
                 const formatter = new Intl.DateTimeFormat(currentLanguage==='hi'?'hi-IN-u-nu-latn':'en-GB', {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+                
+                let otherUserBalanceString = "";
+                let mainBalance = finalBalanceForReport.toFixed(2);
+                
+                if (selectedOtherUserName && data[selectedOtherUserName]) {
+                    otherUserBalanceString = translate('footerIncludeOtherUserFinalBalance', {
+                        otherUser: selectedOtherUserName,
+                        otherUserFinalBalance: otherUserFinalBalanceForReport.toFixed(2),
+                        combinedBalance: combinedFinalBalanceForReport.toFixed(2)
+                    });
+                    mainBalance = combinedFinalBalanceForReport.toFixed(2);
+                }
+
                 footerDiv.textContent = translate('reportGeneratedOn',{
                      user:currentUser, periodTitle: periodTitle,
-                     balance:finalBalanceForReport.toFixed(2), dateTime:formatter.format(now), otherUserBalanceString: ""
+                     balance: mainBalance, dateTime:formatter.format(now),
+                     otherUserBalanceString: otherUserBalanceString
                  });
                  await new Promise(r => setTimeout(r, 50));
             }
@@ -2284,11 +2340,15 @@
                     restoreElements(); if(!blob){ alert(translate('alertCouldNotGenerateImage')); return; }
                     const file = new File([blob], `attendance_report_${currentUser}_${currentlyViewedPeriod}.png`, {type:'image/png'});
                     const shareTitle = translate('reportFor', { user: currentUser, title: periodTitle });
-                    const shareText = `${shareTitle}\n${translate('finalBalanceDueForPeriod', {amount: finalBalanceForReport.toFixed(2)})}`;
+                    
+                    let finalShareText = `${shareTitle}\n${translate('finalBalanceDueForPeriod', {amount: finalBalanceForReport.toFixed(2)})}`;
+                    if (selectedOtherUserName && data[selectedOtherUserName]) {
+                        finalShareText = `${shareTitle}\n${translate('combinedFinalBalance', { currentUser: currentUser, otherUser: selectedOtherUserName, amount: combinedFinalBalanceForReport.toFixed(2) })}`;
+                    }
 
                     if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
                         try {
-                            await navigator.share({ files: [file], title: shareTitle, text: shareText });
+                            await navigator.share({ files: [file], title: shareTitle, text: finalShareText });
                         } catch(err) {
                             if(err.name !== 'AbortError'){ alert(translate('alertWebShareFailed')); downloadBlob(blob, file.name); }
                         }
@@ -2548,4 +2608,4 @@
         });
     </script>
 </body>
-    </html>
+</html>
